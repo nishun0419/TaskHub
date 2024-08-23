@@ -1,16 +1,17 @@
 package main
 
 import (
-    "backend/controllers/auth"
-    "github.com/gin-gonic/gin"
+	"backend/controllers/customer"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-    router := gin.Default()
+	router := gin.Default()
 
-    public := router.Group("/api")
+	public := router.Group("/api")
 
-    public.POST("/register", auth.Register)
+	public.POST("/register", customer.Register)
 
-    router.Run(":8080")
+	router.Run(":8080")
 }
