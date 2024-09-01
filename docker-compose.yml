@@ -7,10 +7,14 @@ services:
       - "8080:8080"
     volumes:
       - ./backend:/app
+    networks:
+      - goflow_network1
   frontend:
     build: ./frontend
     ports:
       - "3000:3000"
+    networks:
+      - goflow_network1
     volumes:
       - ./frontend:/app
     command: sh -c "yarn run dev"
@@ -19,6 +23,8 @@ services:
     container_name: mysql
     ports:
       - 3333:3306
+    networks:
+      - goflow_network1
     environment:
       MYSQL_DATABASE: test_db
       MYSQL_USER: user
@@ -28,3 +34,5 @@ services:
     volumes:
       - ./data:/var/lib/mysql
       - ./mysql.cnf:/etc/mysql/conf.d/my.cnf
+networks:
+  goflow_network1:

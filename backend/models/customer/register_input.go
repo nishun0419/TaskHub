@@ -1,4 +1,4 @@
-package models
+package customer
 
 type RegisterInput struct {
 	Username string `json:"username" binding:"required,min=3,max=10"`
