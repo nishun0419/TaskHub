@@ -3,6 +3,7 @@ package customer
 import (
 	models "backend/models/customer"
 	"backend/service/customer"
+	"backend/utils"
 	validators "backend/validators/customer"
 	"net/http"
 
@@ -10,6 +11,8 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+// RegisterHandler handles customer registration requests.
+// It validates the input, processes the registration, and returns appropriate responses.
 func RegisterHandler(service *customer.CustomerService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var input models.RegisterInput
@@ -23,14 +26,15 @@ func RegisterHandler(service *customer.CustomerService) gin.HandlerFunc {
 				errorMessages = append(errorMessages, "リクエストを正常に受け付けることができませんでした。")
 			}
 
-			c.JSON(http.StatusBadRequest, gin.H{"message": errorMessages})
+			c.JSON(http.StatusBadRequest, utils.ErrorResponse(errorMessages))
 			return
 		}
+
 		if _, err := service.RegisterCustomer(input); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"message": []string{err.Error()}})
+			c.JSON(http.StatusBadRequest, utils.ErrorResponse(err.Error()))
+			return
 		}
-		c.JSON(http.StatusOK, gin.H{
-			"message": []string{"登録OK"},
-		})
+
+		c.JSON(http.StatusOK, utils.SuccessResponse("登録が完了しました。", nil))
 	}
 }
