@@ -26,5 +26,9 @@ func main() {
 
 	public.POST("/register", customer.RegisterHandler(customerService))
 
+	public.OPTIONS("/register", func(c *gin.Context) {
+		c.Status(200)
+	})
+
 	router.Run(":8080")
 }

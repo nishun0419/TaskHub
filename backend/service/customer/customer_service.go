@@ -28,7 +28,7 @@ func (s *CustomerService) RegisterCustomer(input customer.RegisterInput) (custom
 
 	// ハッシュ化されたパスワードを設定
 	input.Password = hashedPassword
-	savedCustomer := customer.Customer{Name: input.Username, Password: input.Password}
+	savedCustomer := customer.Customer{Name: input.Username, Email: input.Email, Password: input.Password}
 	// 顧客をデータベースに保存
 	if result := s.DB.Create(&savedCustomer); result.Error != nil {
 		return customer.Customer{}, fmt.Errorf("failed to register customer: %w", err)

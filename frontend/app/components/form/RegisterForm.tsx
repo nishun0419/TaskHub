@@ -38,8 +38,8 @@ export default function RegisterForm() {
         throw new Error(Array.isArray(data.message) ? data.message.join(', ') : data.message);
       }
 
-      // 登録成功後、ログインページにリダイレクト
-      router.push('/login');
+      // 登録成功後、トップにリダイレクト
+      router.push('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : '登録に失敗しました');
     }
