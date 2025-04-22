@@ -4,16 +4,35 @@ import { useState } from 'react';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { API_ENDPOINTS } from '@/constants/api';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // ここにログイン処理を実装
-    console.log('Login attempt with:', { email, password });
+    try {
+      const response = await fetch(API_ENDPOINTS.LOGIN, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'ログインに失敗しました');
+      }
+
+      // ログイン成功後、マイページにリダイレクト
+      router.push('/mypage');
+    } catch (error) {
+      console.error('Login error:', error);
+    }
   };
 
   const handleSocialLogin = async (provider: 'google' | 'github') => {

@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { API_ENDPOINTS } from '@/constants/api';
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -24,7 +25,7 @@ export default function RegisterForm() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8080/api/register', {
+      const response = await fetch(API_ENDPOINTS.REGISTER, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
