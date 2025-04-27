@@ -2,40 +2,58 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
 
 interface User {
-  customer_id: number;
-  username: string;
+  customer_id?: number;
+  username?: string;
   email: string;
+  name?: string;
+  image?: string;
 }
 
 export default function MyPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // ローカルストレージからユーザー情報を取得
-    const storedUser = localStorage.getItem('user');
-    const token = localStorage.getItem('token');
+    if (status === 'loading') return;
 
-    if (!storedUser || !token) {
-      // ユーザー情報またはトークンが存在しない場合はログインページにリダイレクト
-      router.push('/login');
-      return;
+    if (session) {
+      // Googleログインの場合
+      setUser({
+        email: session.user?.email || '',
+        name: session.user?.name || '',
+        image: session.user?.image || '',
+      });
+    } else {
+      // JWTログインの場合
+      const storedUser = localStorage.getItem('user');
+      const token = localStorage.getItem('token');
+
+      if (!storedUser || !token) {
+        router.push('/login');
+        return;
+      }
+
+      setUser(JSON.parse(storedUser));
     }
-
-    setUser(JSON.parse(storedUser));
-  }, [router]);
+  }, [session, status, router]);
 
   const handleLogout = () => {
-    // ローカルストレージからユーザー情報とトークンを削除
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    // ログインページにリダイレクト
+    if (session) {
+      // Googleログインの場合
+      signOut();
+    } else {
+      // JWTログインの場合
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+    }
     router.push('/login');
   };
 
-  if (!user) {
+  if (status === 'loading' || !user) {
     return <div>Loading...</div>;
   }
 
@@ -50,10 +68,24 @@ export default function MyPage() {
           </div>
           <div className="border-t border-gray-200">
             <dl>
+              {user.image && (
+                <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                  <dt className="text-sm font-medium text-gray-500">プロフィール画像</dt>
+                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                    <img
+                      src={user.image}
+                      alt="Profile"
+                      className="h-20 w-20 rounded-full"
+                    />
+                  </dd>
+                </div>
+              )}
               <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">ユーザー名</dt>
+                <dt className="text-sm font-medium text-gray-500">
+                  {session ? '名前' : 'ユーザー名'}
+                </dt>
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  {user.username}
+                  {session ? user.name : user.username}
                 </dd>
               </div>
               <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">

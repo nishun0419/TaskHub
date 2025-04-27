@@ -10,7 +10,8 @@ export default function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
-
+  const [error, setError] = useState('');
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -24,9 +25,17 @@ export default function LoginForm() {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || 'ログインに失敗しました');
+      if (response.ok) {
+        // JWTトークンをローカルストレージに保存
+        localStorage.setItem('token', data.token);
+        // ユーザー情報をローカルストレージに保存
+        localStorage.setItem('user', JSON.stringify(data.user));
+        // マイページに遷移
+        router.push('/mypage');
+      } else {
+        setError(data.message[0] || 'ログインに失敗しました。');
       }
+
 
       // ログイン成功後、マイページにリダイレクト
       router.push('/mypage');
