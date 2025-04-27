@@ -9,6 +9,13 @@ services:
       - ./backend:/app
     networks:
       - goflow_network1
+    env_file:
+      - ./backend/.env.${ENV:-local}
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+    depends_on:
+      - db
   frontend:
     build: ./frontend
     ports:
@@ -25,10 +32,10 @@ services:
     networks:
       - goflow_network1
     environment:
-      MYSQL_DATABASE: test_db
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ${DB_NAME:-goflow}
+      MYSQL_USER: ${DB_USER:-root}
+      MYSQL_PASSWORD: ${DB_PASS:-root}
+      MYSQL_ROOT_PASSWORD: ${DB_PASS:-root}
       TZ: Asia/Tokyo
     volumes:
       - ./data:/var/lib/mysql

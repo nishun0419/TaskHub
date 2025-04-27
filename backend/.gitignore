@@ -1,0 +1,3 @@
+main
+.env.local
+.env.prod

@@ -5,17 +5,11 @@ import (
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 func ConnectDataBase() *gorm.DB {
-	err := godotenv.Load()
-
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
 	dbUser := os.Getenv("DB_USER")
 	dbPass := os.Getenv("DB_PASS")
 	dbName := os.Getenv("DB_NAME")
