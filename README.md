@@ -3,12 +3,16 @@
 Go（Gin）とNext.js 14を使用した、JWT認証・Google認証対応のシンプルな会員管理アプリケーションです。  
 Dockerを用いた開発環境構築も対応しています。
 
+<img width="1456" alt="Image" src="https://github.com/user-attachments/assets/6a2a0a20-c3c4-4568-b53b-e10fde271181" />
+
+<img width="1459" alt="Image" src="https://github.com/user-attachments/assets/6455dac5-f360-4e2c-b767-99bd0c1fa236" />
+
 ---
 
 ## 📚 使用技術
 
 ### バックエンド
-- Go 1.24
+- Go 1.23
 - Gin
 - GORM
 - Goose（マイグレーションツール）
@@ -37,6 +41,12 @@ Dockerを用いた開発環境構築も対応しています。
     ├── constants/          # 定数管理
     └── public/             # 静的ファイル
 ```
+## 📖 APIエンドポイント一覧
+
+| メソッド | エンドポイント   | 説明                     | 認証必要 |
+|:--------|:-----------------|:--------------------------|:--------|
+| POST    | /api/register     | 新規ユーザー登録           | 不要    |
+| POST    | /api/login        | ログイン（JWT発行）        | 不要    |
 
 ---
 
