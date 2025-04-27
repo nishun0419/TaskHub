@@ -6,30 +6,42 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-// フィールド名をユーザー向けに変換する配列
-var returnLoginrFieldNames = map[string]string{
-	"Username": "ユーザー名",
+const (
+	LoginErrorRequired    = "%sは必須項目です。"
+	LoginErrorMinLength   = "%sは%s文字以上で入力してください。"
+	LoginErrorMaxLength   = "%sは%s文字以下で入力してください。"
+	LoginErrorEmailFormat = "%sは有効なメールアドレスではありません。"
+	LoginErrorDefault     = "%sフィールドのバリデーションに失敗しました。"
+)
+
+// fieldNameMap maps field names to their display names in Japanese.
+var LoginFieldNameMap = map[string]string{
+	"Email":    "メールアドレス",
 	"Password": "パスワード",
 }
 
+// CreateLoginErrorMessage converts validation errors into user-friendly error messages.
 func CreateLoginErrorMessage(err validator.ValidationErrors) []string {
-	// エラーメッセージを格納する変数
 	var errorMessages []string
 
 	for _, fe := range err {
 		fieldName := fe.Field()
+		displayName := LoginFieldNameMap[fieldName]
+
+		var message string
 		switch fe.Tag() {
 		case "required":
-			errorMessages = append(errorMessages, fmt.Sprintf("%sは必須項目です。", returnLoginrFieldNames[fieldName]))
+			message = fmt.Sprintf(LoginErrorRequired, displayName)
 		case "min":
-			errorMessages = append(errorMessages, fmt.Sprintf("%sは%s文字以上で入力してください。", returnLoginrFieldNames[fieldName], fe.Param()))
+			message = fmt.Sprintf(LoginErrorMinLength, displayName, fe.Param())
 		case "max":
-			errorMessages = append(errorMessages, fmt.Sprintf("%sは%s文字以下で入力してください。", returnLoginrFieldNames[fieldName], fe.Param()))
+			message = fmt.Sprintf(LoginErrorMaxLength, displayName, fe.Param())
 		case "email":
-			errorMessages = append(errorMessages, fmt.Sprintf("%sは有効なメールアドレスではありません。", returnLoginrFieldNames[fieldName]))
+			message = fmt.Sprintf(LoginErrorEmailFormat, displayName)
 		default:
-			errorMessages = append(errorMessages, fmt.Sprintf("%sフィールドのバリデーションに失敗しました。", returnLoginrFieldNames[fieldName]))
+			message = fmt.Sprintf(LoginErrorDefault, displayName)
 		}
+		errorMessages = append(errorMessages, message)
 	}
 	return errorMessages
 }

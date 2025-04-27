@@ -25,10 +25,7 @@ func main() {
 	public := router.Group("/api")
 
 	public.POST("/register", customer.RegisterHandler(customerService))
-
-	public.OPTIONS("/register", func(c *gin.Context) {
-		c.Status(200)
-	})
+	public.POST("/login", customer.LoginHandler(customerService))
 
 	router.Run(":8080")
 }

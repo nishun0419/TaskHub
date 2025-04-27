@@ -9,15 +9,15 @@ import (
 )
 
 const (
-	errorRequired    = "%sは必須項目です。"
-	errorMinLength   = "%sは%s文字以上で入力してください。"
-	errorMaxLength   = "%sは%s文字以下で入力してください。"
-	errorEmailFormat = "%sは有効なメールアドレスではありません。"
-	errorDefault     = "%sフィールドのバリデーションに失敗しました。"
+	RegisterErrorRequired    = "%sは必須項目です。"
+	RegisterErrorMinLength   = "%sは%s文字以上で入力してください。"
+	RegisterErrorMaxLength   = "%sは%s文字以下で入力してください。"
+	RegisterErrorEmailFormat = "%sは有効なメールアドレスではありません。"
+	RegisterErrorDefault     = "%sフィールドのバリデーションに失敗しました。"
 )
 
 // fieldNameMap maps field names to their display names in Japanese.
-var fieldNameMap = map[string]string{
+var RegisterFieldNameMap = map[string]string{
 	"Username": "ユーザー名",
 	"Email":    "メールアドレス",
 	"Password": "パスワード",
@@ -31,20 +31,20 @@ func CreateRegisterErrorMessage(err validator.ValidationErrors) []string {
 
 	for _, fe := range err {
 		fieldName := fe.Field()
-		displayName := fieldNameMap[fieldName]
+		displayName := RegisterFieldNameMap[fieldName]
 
 		var message string
 		switch fe.Tag() {
 		case "required":
-			message = fmt.Sprintf(errorRequired, displayName)
+			message = fmt.Sprintf(RegisterErrorRequired, displayName)
 		case "min":
-			message = fmt.Sprintf(errorMinLength, displayName, fe.Param())
+			message = fmt.Sprintf(RegisterErrorMinLength, displayName, fe.Param())
 		case "max":
-			message = fmt.Sprintf(errorMaxLength, displayName, fe.Param())
+			message = fmt.Sprintf(RegisterErrorMaxLength, displayName, fe.Param())
 		case "email":
-			message = fmt.Sprintf(errorEmailFormat, displayName)
+			message = fmt.Sprintf(RegisterErrorEmailFormat, displayName)
 		default:
-			message = fmt.Sprintf(errorDefault, displayName)
+			message = fmt.Sprintf(RegisterErrorDefault, displayName)
 		}
 		errorMessages = append(errorMessages, message)
 	}

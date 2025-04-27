@@ -1,71 +1,76 @@
 'use client';
 
-import { useSession, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+interface User {
+  customer_id: number;
+  username: string;
+  email: string;
+}
 
 export default function MyPage() {
-  const { data: session, status } = useSession();
   const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/");
-    }
-  }, [status, router]);
+    // ローカルストレージからユーザー情報を取得
+    const storedUser = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
 
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-purple-500"></div>
-      </div>
-    );
+    if (!storedUser || !token) {
+      // ユーザー情報またはトークンが存在しない場合はログインページにリダイレクト
+      router.push('/login');
+      return;
+    }
+
+    setUser(JSON.parse(storedUser));
+  }, [router]);
+
+  const handleLogout = () => {
+    // ローカルストレージからユーザー情報とトークンを削除
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    // ログインページにリダイレクト
+    router.push('/login');
+  };
+
+  if (!user) {
+    return <div>Loading...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-500 via-pink-500 to-red-500 p-4">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-xl p-8 mt-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">マイページ</h1>
-          <button
-            onClick={() => signOut()}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors duration-200"
-          >
-            ログアウト
-          </button>
-        </div>
-
-        <div className="space-y-6">
-          <div className="flex items-center space-x-4">
-            {session?.user?.image && (
-              <img
-                src={session.user.image}
-                alt="Profile"
-                className="w-20 h-20 rounded-full"
-              />
-            )}
-            <div>
-              <h2 className="text-xl font-semibold text-gray-800">
-                {session?.user?.name}
-              </h2>
-              <p className="text-gray-600">{session?.user?.email}</p>
-            </div>
-          </div>
-
-          <div className="bg-gray-50 p-6 rounded-lg">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              アカウント情報
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+          <div className="px-4 py-5 sm:px-6">
+            <h3 className="text-lg leading-6 font-medium text-gray-900">
+              マイページ
             </h3>
-            <div className="space-y-2">
-              <p>
-                <span className="font-medium">プロバイダー:</span>{" "}
-                {session?.user?.provider}
-              </p>
-              <p>
-                <span className="font-medium">最終ログイン:</span>{" "}
-                {new Date().toLocaleString()}
-              </p>
-            </div>
+          </div>
+          <div className="border-t border-gray-200">
+            <dl>
+              <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500">ユーザー名</dt>
+                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                  {user.username}
+                </dd>
+              </div>
+              <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500">メールアドレス</dt>
+                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                  {user.email}
+                </dd>
+              </div>
+            </dl>
+          </div>
+          <div className="px-4 py-5 sm:px-6">
+            <button
+              onClick={handleLogout}
+              className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              ログアウト
+            </button>
           </div>
         </div>
       </div>
