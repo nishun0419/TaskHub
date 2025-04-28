@@ -2,8 +2,9 @@ package main
 
 import (
 	"backend/controllers/customer"
+	repository "backend/infrastructure/customer"
 	"backend/pkg/db"
-	service "backend/service/customer"
+	usecase "backend/usecase/customer"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -12,10 +13,12 @@ import (
 func main() {
 	database := db.ConnectDataBase()
 
-	customerServiceInterface := service.NewCustomerService(database)
+	customerRepository := repository.NewCustomerRepository(database)
+	customerUsecase := usecase.NewCustomerUsecase(customerRepository)
+	customerController := customer.NewCustomerController(customerUsecase)
+
 	router := gin.Default()
 
-	// CORSミドルウェアの設定
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"http://localhost:3000"}
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
@@ -24,8 +27,8 @@ func main() {
 
 	public := router.Group("/api")
 
-	public.POST("/register", customer.RegisterHandler(customerServiceInterface))
-	public.POST("/login", customer.LoginHandler(customerServiceInterface))
+	public.POST("/register", customerController.RegisterHandler)
+	public.POST("/login", customerController.LoginHandler)
 
 	router.Run(":8080")
 }

@@ -32,18 +32,18 @@ export default function Home() {
           <div className="text-center">
             <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
               GoFlow
-              <span className="text-indigo-600"> - シンプルな会員管理アプリ</span>
+              <span className="text-indigo-600"> - シンプルな会員管理機能を一瞬で作成</span>
             </h1>
             <p className="mt-6 text-lg leading-8 text-gray-600">
               Go（Gin）とNext.js 14を使用した、JWT認証・Google認証対応の
-              シンプルな会員管理アプリケーションです。
+              シンプルな会員管理機能を一瞬で作成できます。
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <Link
                 href="/register"
                 className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
-                無料で始める
+                会員登録
               </Link>
               <Link href="/login" className="text-sm font-semibold leading-6 text-gray-900">
                 ログイン <span aria-hidden="true">→</span>
@@ -123,7 +123,7 @@ const features = [
   },
   {
     name: 'マイページ機能',
-    description: '認証後のユーザー専用マイページで、個人情報の管理が可能。',
+    description: '認証後のユーザー専用マイページが表示されます。',
   },
 ];
 
