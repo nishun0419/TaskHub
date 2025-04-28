@@ -11,7 +11,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const router = useRouter();
   const [error, setError] = useState('');
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -24,7 +24,6 @@ export default function LoginForm() {
       });
 
       const data = await response.json();
-
       if (response.ok) {
         // JWTトークンをローカルストレージに保存
         localStorage.setItem('token', data.token);
@@ -33,14 +32,11 @@ export default function LoginForm() {
         // マイページに遷移
         router.push('/mypage');
       } else {
-        setError(data.message[0] || 'ログインに失敗しました。');
+        setError(Array.isArray(data.message) ? data.message[0] : data.message || 'ログインに失敗しました。');
       }
-
-
-      // ログイン成功後、マイページにリダイレクト
-      router.push('/mypage');
     } catch (error) {
       console.error('Login error:', error);
+      setError('ログインに失敗しました。');
     }
   };
 
@@ -90,6 +86,12 @@ export default function LoginForm() {
               required
             />
           </div>
+
+          {error && (
+            <div className="text-red-500 text-sm mt-2">
+              {error}
+            </div>
+          )}
 
           <button
             type="submit"

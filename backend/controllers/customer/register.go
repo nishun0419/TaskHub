@@ -13,7 +13,7 @@ import (
 
 // RegisterHandler handles customer registration requests.
 // It validates the input, processes the registration, and returns appropriate responses.
-func RegisterHandler(service *customer.CustomerService) gin.HandlerFunc {
+func RegisterHandler(service customer.CustomerServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var input models.RegisterInput
 

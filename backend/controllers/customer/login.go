@@ -10,7 +10,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func LoginHandler(service *customer.CustomerService) gin.HandlerFunc {
+func LoginHandler(service customer.CustomerServiceInterface) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var input models.LoginInput
 

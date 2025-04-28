@@ -12,7 +12,7 @@ import (
 func main() {
 	database := db.ConnectDataBase()
 
-	customerService := service.NewCustomerService(database)
+	customerServiceInterface := service.NewCustomerService(database)
 	router := gin.Default()
 
 	// CORSミドルウェアの設定
@@ -24,8 +24,8 @@ func main() {
 
 	public := router.Group("/api")
 
-	public.POST("/register", customer.RegisterHandler(customerService))
-	public.POST("/login", customer.LoginHandler(customerService))
+	public.POST("/register", customer.RegisterHandler(customerServiceInterface))
+	public.POST("/login", customer.LoginHandler(customerServiceInterface))
 
 	router.Run(":8080")
 }

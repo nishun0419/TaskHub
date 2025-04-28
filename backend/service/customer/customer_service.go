@@ -11,13 +11,20 @@ import (
 	"gorm.io/gorm"
 )
 
+// CustomerService interface
+type CustomerServiceInterface interface {
+	RegisterCustomer(input customer.RegisterInput) (customer.Customer, error)
+	Authenticate(email, password string) (customer.Customer, error)
+	GenerateToken(cust customer.Customer) (string, error)
+}
+
 // CustomerService defines a service with a database connection
 type CustomerService struct {
 	DB *gorm.DB
 }
 
 // NewCustomerService creates a new instance of CustomerService
-func NewCustomerService(db *gorm.DB) *CustomerService {
+func NewCustomerService(db *gorm.DB) CustomerServiceInterface {
 	return &CustomerService{DB: db}
 }
 
