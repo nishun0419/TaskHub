@@ -14,12 +14,11 @@ func main() {
 	database := db.ConnectDataBase()
 
 	customerRepository := repository.NewCustomerRepository(database)
-	customerUsecase := usecase.NewCustomerService(customerRepository)
+	customerUsecase := usecase.NewCustomerUsecase(customerRepository)
 	customerController := customer.NewCustomerController(customerUsecase)
 
 	router := gin.Default()
 
-	// CORSミドルウェアの設定
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"http://localhost:3000"}
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}

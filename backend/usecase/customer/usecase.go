@@ -14,8 +14,7 @@ type CustomerUsecase struct {
 	CustomerRepository customer.CustomerRepository
 }
 
-// NewCustomerService creates a new instance of CustomerService
-func NewCustomerService(repo customer.CustomerRepository) *CustomerUsecase {
+func NewCustomerUsecase(repo customer.CustomerRepository) *CustomerUsecase {
 	return &CustomerUsecase{repo}
 }
 

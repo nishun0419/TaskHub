@@ -1,7 +1,7 @@
 # GoFlow
 
-Go（Gin）とNext.js 14を使用した、JWT認証・Google認証対応のシンプルな会員管理アプリケーションです。  
-Dockerを用いた開発環境構築も対応しています。
+Go（Gin）とNext.js 14を使用した、JWT認証・Google認証対応のシンプルな会員管理機能を一瞬で作成。  
+Dockerを用いた開発環境構築に対応。
 
 <img width="1456" alt="Image" src="https://github.com/user-attachments/assets/6a2a0a20-c3c4-4568-b53b-e10fde271181" />
 
@@ -32,14 +32,18 @@ Dockerを用いた開発環境構築も対応しています。
 ├── backend/
 │   ├── cmd/                # エントリーポイント
 │   ├── controllers/        # ハンドラー層
-│   ├── models/             # データモデル
-│   ├── service/            # ビジネスロジック
-│   ├── validators/         # バリデーション
-│   └── db/                 # DB接続・マイグレーション
+│   ├── domain/            # ドメインモデル
+│   ├── usecase/           # ユースケース層
+│   ├── validators/        # バリデーション
+│   ├── db/                # DB接続・マイグレーション
+│   ├── infrastructure/    # インフラストラクチャ層
+│   ├── pkg/               # 共通パッケージ
+│   └── utils/             # ユーティリティ
 └── frontend/
-    ├── app/                # App Router構成
-    ├── constants/          # 定数管理
-    └── public/             # 静的ファイル
+    ├── app/               # App Router構成
+    ├── constants/         # 定数管理
+    ├── types/            # 型定義
+    └── public/           # 静的ファイル
 ```
 ## 📖 APIエンドポイント一覧
 
