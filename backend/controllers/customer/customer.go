@@ -15,6 +15,10 @@ type CustomerController struct {
 	Usecase *usecase.CustomerUsecase
 }
 
+func NewCustomerController(u *usecase.CustomerUsecase) *CustomerController {
+	return &CustomerController{Usecase: u}
+}
+
 func (c *CustomerController) LoginHandler(ctx *gin.Context) {
 	var input domain.LoginInput
 

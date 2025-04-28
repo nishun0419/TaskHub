@@ -18,10 +18,10 @@ func (r *CustomerRepository) RegisterCustomer(customer *customer.Customer) error
 	return r.db.Create(customer).Error
 }
 
-func (r *CustomerRepository) FindByEmail(email string) error {
+func (r *CustomerRepository) FindByEmail(email string) (customer.Customer, error) {
 	var customer customer.Customer
 	if err := r.db.Where("email = ?", email).First(&customer).Error; err != nil {
-		return err
+		return customer, err
 	}
-	return nil
+	return customer, nil
 }

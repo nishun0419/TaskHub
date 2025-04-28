@@ -45,12 +45,12 @@ func hashPassword(password string) (string, error) {
 
 // ユーザー認証を行う
 func (u *CustomerUsecase) Authenticate(email, password string) (customer.Customer, error) {
-	var cust customer.Customer
-	if err := u.CustomerRepository.FindByEmail(email); err != nil {
+	cust, err := u.CustomerRepository.FindByEmail(email)
+	if err != nil {
 		return customer.Customer{}, fmt.Errorf("failed to authenticate customer: %w", err)
 	}
 
-	err := bcrypt.CompareHashAndPassword([]byte(cust.Password), []byte(password))
+	err = bcrypt.CompareHashAndPassword([]byte(cust.Password), []byte(password))
 	if err != nil {
 		return customer.Customer{}, fmt.Errorf("failed to authenticate customer: %w", err)
 	}
