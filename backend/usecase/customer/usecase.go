@@ -1,50 +1,40 @@
 package customer
 
 import (
-	"backend/models/customer"
+	"backend/domain/customer"
 	"fmt"
 	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
-// CustomerService interface
-type CustomerServiceInterface interface {
-	RegisterCustomer(input customer.RegisterInput) (customer.Customer, error)
-	Authenticate(email, password string) (customer.Customer, error)
-	GenerateToken(cust customer.Customer) (string, error)
-}
-
-// CustomerService defines a service with a database connection
-type CustomerService struct {
-	DB *gorm.DB
+type CustomerUsecase struct {
+	CustomerRepository customer.CustomerRepository
 }
 
 // NewCustomerService creates a new instance of CustomerService
-func NewCustomerService(db *gorm.DB) CustomerServiceInterface {
-	return &CustomerService{DB: db}
+func NewCustomerService(repo customer.CustomerRepository) *CustomerUsecase {
+	return &CustomerUsecase{repo}
 }
 
-// RegisterCustomer handles the logic of registering a new customer
-func (s *CustomerService) RegisterCustomer(input customer.RegisterInput) (customer.Customer, error) {
+func (u *CustomerUsecase) RegisterCustomer(input customer.RegisterInput) error {
 	// パスワードのハッシュ化
 	hashedPassword, err := hashPassword(input.Password)
 	if err != nil {
-		return customer.Customer{}, fmt.Errorf("failed to hash password: %w", err)
+		return fmt.Errorf("failed to hash password: %w", err)
 	}
 
 	// ハッシュ化されたパスワードを設定
 	input.Password = hashedPassword
 	savedCustomer := customer.Customer{Username: input.Username, Email: input.Email, Password: input.Password}
 	// 顧客をデータベースに保存
-	if result := s.DB.Create(&savedCustomer); result.Error != nil {
-		return customer.Customer{}, fmt.Errorf("failed to register customer: %w", err)
+	if err := u.CustomerRepository.RegisterCustomer(&savedCustomer); err != nil {
+		return fmt.Errorf("failed to register customer: %w", err)
 	}
 
-	return customer.Customer{}, nil
+	return nil
 }
 
 // hashPassword パスワードをハッシュ化するヘルパー関数
@@ -54,9 +44,9 @@ func hashPassword(password string) (string, error) {
 }
 
 // ユーザー認証を行う
-func (s *CustomerService) Authenticate(email, password string) (customer.Customer, error) {
+func (u *CustomerUsecase) Authenticate(email, password string) (customer.Customer, error) {
 	var cust customer.Customer
-	if err := s.DB.Where("email = ?", email).First(&cust).Error; err != nil {
+	if err := u.CustomerRepository.FindByEmail(email); err != nil {
 		return customer.Customer{}, fmt.Errorf("failed to authenticate customer: %w", err)
 	}
 
@@ -69,7 +59,7 @@ func (s *CustomerService) Authenticate(email, password string) (customer.Custome
 }
 
 // JWTトークンを生成する
-func (s *CustomerService) GenerateToken(cust customer.Customer) (string, error) {
+func (u *CustomerUsecase) GenerateToken(cust customer.Customer) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"customer_id": cust.CustomerID,
 		"exp":         time.Now().Add(time.Hour * 24).Unix(),
