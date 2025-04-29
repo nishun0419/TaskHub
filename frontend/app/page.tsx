@@ -2,19 +2,24 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
-  const storedUser = localStorage.getItem('user');
+  const [storedUser, setStoredUser] = useState<string | null>(null);
+
+  useEffect(() => {
+    const user = localStorage.getItem('user');
+    setStoredUser(user);
+  }, []);
 
   useEffect(() => {
     if (status === 'authenticated' || storedUser) {
       router.push('/mypage');
     }
-  }, [status, router]);
+  }, [status, storedUser, router]);
 
   if (status === 'loading') {
     return (
