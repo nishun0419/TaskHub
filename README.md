@@ -1,132 +1,97 @@
-# GoFlow
-
-Go（Gin）とNext.js 14を使用した、JWT認証・Google認証対応のシンプルな会員管理機能を一瞬で作成。  
-Dockerを用いた開発環境構築に対応。
-
-<img width="1456" alt="Image" src="https://github.com/user-attachments/assets/6a2a0a20-c3c4-4568-b53b-e10fde271181" />
-
-<img width="1459" alt="Image" src="https://github.com/user-attachments/assets/6455dac5-f360-4e2c-b767-99bd0c1fa236" />
+# チーム管理付きTODOアプリ TaskHub
 
 ---
 
-## 📚 使用技術
+## 1. プロジェクト概要
 
-### バックエンド
-- Go 1.23
-- Gin
-- GORM
-- Goose（マイグレーションツール）
-- MySQL
+Go【Gin】をバックエンド、Next.js【14】をフロントエンドとし、
+**チーム管理機能付きTODOリストサービス**を開発する。
 
-### フロントエンド
-- Next.js 14 (App Router)
-- Tailwind CSS
-- NextAuth.js（Google OAuth認証）
-- JWT認証（アクセストークン）
-
-### その他
-- Docker / Docker Compose
-### ディレクトリ構造
-```
-.
-├── backend/
-│   ├── cmd/                # エントリーポイント
-│   ├── controllers/        # ハンドラー層
-│   ├── domain/            # ドメインモデル
-│   ├── usecase/           # ユースケース層
-│   ├── validators/        # バリデーション
-│   ├── db/                # DB接続・マイグレーション
-│   ├── infrastructure/    # インフラストラクチャ層
-│   ├── pkg/               # 共通パッケージ
-│   └── utils/             # ユーティリティ
-└── frontend/
-    ├── app/               # App Router構成
-    ├── constants/         # 定数管理
-    ├── types/            # 型定義
-    └── public/           # 静的ファイル
-```
-## 📖 APIエンドポイント一覧
-
-| メソッド | エンドポイント   | 説明                     | 認証必要 |
-|:--------|:-----------------|:--------------------------|:--------|
-| POST    | /api/register     | 新規ユーザー登録           | 不要    |
-| POST    | /api/login        | ログイン（JWT発行）        | 不要    |
+ユーザーはログイン後、チームを作成し、
+チームメンバーとTODOを共有・管理できる。
 
 ---
 
-## 🚀 機能一覧
+## 2. 対象ユーザー
 
-- ユーザー登録（メールアドレス・パスワード）
-- JWT発行によるログイン認証
-- GoogleアカウントによるOAuthログイン
-- マイページ閲覧（認証後のみ）
-- ログアウト処理
-- （今後追加予定）リフレッシュトークン対応
+- 複数人でタスク管理をしたいユーザー
+- チーム単位でプロジェクトを運用したいユーザー
 
 ---
 
-## 🛠️ 環境構築方法
+## 3. 機能要件
 
-1. リポジトリをクローン
-```bash
-git clone https://github.com/nishun0419/goflow.git
-cd goflow
-cp frontend/env frontend/.env.local
-```
-※googleログインをする場合は.env.localに必要な情報を入れてください
+### 3.1 認証機能
 
-2. Dockerコンテナのビルド
-```bash
-docker compose build 
-```
-3. アプリケーションの起動
-```bash
-# 開発環境
-docker compose up
-```
+- メールアドレス・パスワードによるログイン/新規登録
+- JWTを利用したトークン認証
+- ログイン状態の維持
 
-4. アプリケーションにアクセス
-- フロントエンド: http://localhost:3000
-- バックエンドAPI: http://localhost:8080
+### 3.2 チーム機能
 
-## 開発環境での作業
+- チーム作成
+- チーム一覧表示
+- チーム詳細閲覧
+- チームメンバー管理 (オプション)
 
-### バックエンド
-```bash
-# コンテナに入る
-docker compose exec backend sh
+### 3.3 TODO管理機能
 
-# マイグレーションの実行
-GOOSE_DBSTRING="${DB_USER}:${DB_PASS}@tcp(${DB_HOST}:${DB_PORT})/${DB_NAME}" go run github.com/pressly/goose/v3/cmd/goose@latest -dir db/migrations up
+- TODO新規作成
+- TODO一覧表示
+- TODO編集
+- TODO削除
+- TODO完了チェック
+- 自分のTODOのみ編集/削除可能にする
 
-# アプリケーションの起動
-go run cmd/main.go
-```
+### 3.4 招待機能 (オプション)
 
-### フロントエンド
-```bash
-# コンテナに入る
-docker compose exec frontend sh
+- チームに新しいメンバーを招待
+- 招待リンク発行 or メール指定
 
-# 依存関係のインストール
-npm install
+---
 
-# 開発サーバーの起動
-npm run dev
-```
+## 4. 画面要件
 
-## テスト
+| ページ名 | 内容 |
+|:--|:--|
+| ログインページ | メール・パスワードでログイン |
+| 新規登録ページ | ユーザー名、メール、パスワード登録 |
+| チーム一覧ページ | 所属チーム一覧表示 |
+| チーム作成ページ | チーム名入力フォーム |
+| チーム詳細ページ | TODO一覧表示、新規追加フォーム |
+| 招待ページ | メール入力、招待ボタン |
 
-### バックエンド
-```bash
-# コンテナ内で実行
-docker compose exec backend sh
-go test ./...
-```
+---
 
-### フロントエンド
-```bash
-# コンテナ内で実行
-docker compose exec frontend sh
-npm test
-```
+## 5. 非機能要件
+
+- Docker Composeを利用して一括起動可能
+- Clean Architectureベースの実装
+- GORMを使用したDB操作
+- テストの整備 (Usecase層中心)
+- バリデーションチェック
+- APIドキュメントはREADME等に記載
+
+---
+
+## 6. 使用技術
+
+| 分類 | 技術 |
+|:--|:--|
+| バックエンド | Go (Gin)、GORM |
+| フロントエンド | Next.js 14 (App Router)、Tailwind CSS |
+| 認証 | JWT |
+| インフラ | Docker / Docker Compose、MySQL |
+
+---
+
+## 7. データベース設計 (仮)
+
+| テーブル名 | 説明 |
+|:--|:--|
+| users | ユーザー情報 (ID, メール, パスワード, 名前) |
+| teams | チーム情報 (ID, チーム名) |
+| team_members | チームメンバー管理 (team_id, user_id) |
+| todos | TODO情報 (ID, title, completed, team_id, user_id) |
+
+---
