@@ -96,6 +96,27 @@ export default function MyPage() {
               </div>
             </dl>
           </div>
+
+          <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
+            <h4 className="text-lg font-medium text-gray-900 mb-4">チーム</h4>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <a
+                  href="/teams"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  チーム一覧
+                </a>
+                <a
+                  href="/teams/create"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  チーム作成
+                </a>
+              </div>
+            </div>
+          </div>
+
           <div className="px-4 py-5 sm:px-6">
             <button
               onClick={handleLogout}

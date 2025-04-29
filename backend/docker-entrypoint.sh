@@ -7,4 +7,4 @@ GOOSE_DBSTRING="${DB_USER}:${DB_PASS}@tcp(${DB_HOST}:${DB_PORT})/${DB_NAME}" go 
 
 # アプリケーションを起動
 echo "Starting application..."
-exec ./main
+exec go run cmd/main.go

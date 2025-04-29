@@ -36,13 +36,9 @@ export default function Home() {
         <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
           <div className="text-center">
             <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-              GoFlow
-              <span className="text-indigo-600"> - シンプルな会員管理機能を一瞬で作成</span>
+              TaskHub
+              <span className="text-indigo-600"> - チーム管理機能付きTODOリストサービスを一瞬で作成</span>
             </h1>
-            <p className="mt-6 text-lg leading-8 text-gray-600">
-              Go（Gin）とNext.js 14を使用した、JWT認証・Google認証対応の
-              シンプルな会員管理機能を一瞬で作成できます。
-            </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <Link
                 href="/register"

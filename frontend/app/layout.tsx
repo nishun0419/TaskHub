@@ -8,8 +8,8 @@ import { Providers } from './providers';
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "GoFlow",
-  description: "タスク管理アプリケーション",
+  title: "TaskHub",
+  description: "チーム管理機能付きTODOリストサービス",
 };
 
 export default function RootLayout({
