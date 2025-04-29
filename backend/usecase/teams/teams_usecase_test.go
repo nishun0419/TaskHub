@@ -88,6 +88,7 @@ func TestUpdateTeam(t *testing.T) {
 	usecase := NewTeamUsecase(mockRepo)
 
 	input := teams.UpdateInput{
+		ID:          1,
 		Name:        "updated Test Team",
 		Description: "updated Test Description",
 	}
