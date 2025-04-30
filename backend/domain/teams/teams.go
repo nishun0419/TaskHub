@@ -5,7 +5,7 @@ import (
 )
 
 type Team struct {
-	ID          int
+	TeamID      int
 	Name        string
 	Description string
 	CreatedAt   time.Time
