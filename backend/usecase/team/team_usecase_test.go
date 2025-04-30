@@ -1,7 +1,8 @@
-package teams
+package team
 
 import (
-	"backend/domain/teams"
+	"backend/domain/team"
+	"backend/domain/team_member"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,17 +13,21 @@ type MockTeamRepository struct {
 	mock.Mock
 }
 
-func (m *MockTeamRepository) CreateTeam(team *teams.Team) error {
-	args := m.Called(team)
+type MockTeamMemberRepository struct {
+	mock.Mock
+}
+
+func (m *MockTeamRepository) CreateTeam(t *team.Team) error {
+	args := m.Called(t)
 	return args.Error(0)
 }
 
-func (m *MockTeamRepository) GetTeam(id int) (*teams.Team, error) {
+func (m *MockTeamRepository) GetTeam(id int) (*team.Team, error) {
 	args := m.Called(id)
-	return args.Get(0).(*teams.Team), args.Error(1)
+	return args.Get(0).(*team.Team), args.Error(1)
 }
 
-func (m *MockTeamRepository) UpdateTeam(id int, team *teams.Team) error {
+func (m *MockTeamRepository) UpdateTeam(id int, team *team.Team) error {
 	args := m.Called(id, team)
 	return args.Error(0)
 }
@@ -32,43 +37,46 @@ func (m *MockTeamRepository) DeleteTeam(id int) error {
 	return args.Error(0)
 }
 
-func (m *MockTeamRepository) AddMember(teamID int, customerID int) error {
-	args := m.Called(teamID, customerID)
-	return args.Error(0)
-}
-
-func (m *MockTeamRepository) RemoveMember(teamID int, customerID int) error {
-	args := m.Called(teamID, customerID)
-	return args.Error(0)
-}
-
-func (m *MockTeamRepository) GetTeamsByCustomerID(customerID int) ([]*teams.Team, error) {
+func (m *MockTeamRepository) GetTeamsByCustomerID(customerID int) ([]*team.Team, error) {
 	args := m.Called(customerID)
-	return args.Get(0).([]*teams.Team), args.Error(1)
+	return args.Get(0).([]*team.Team), args.Error(1)
+}
+
+func (m *MockTeamMemberRepository) AddTeamMember(teamMember *team_member.TeamMember) error {
+	args := m.Called(teamMember)
+	return args.Error(0)
+}
+
+func (m *MockTeamMemberRepository) DeleteTeamMember(teamMemberDelInput *team_member.TeamMemberDelInput) error {
+	args := m.Called(teamMemberDelInput)
+	return args.Error(0)
 }
 
 func TestCreateTeam(t *testing.T) {
-	mockRepo := new(MockTeamRepository)
-	usecase := NewTeamUsecase(mockRepo)
+	teamRepo := new(MockTeamRepository)
+	teamMemberRepo := new(MockTeamMemberRepository)
+	usecase := NewTeamUsecase(teamRepo, teamMemberRepo)
 
-	input := teams.CreateInput{
+	input := team.CreateInput{
 		Name:        "Test Team",
 		Description: "Test Description",
 	}
 
-	mockRepo.On("CreateTeam", mock.AnythingOfType("*teams.Team")).Return(nil)
+	teamRepo.On("CreateTeam", mock.AnythingOfType("*team.Team")).Return(nil)
+	teamMemberRepo.On("AddTeamMember", mock.AnythingOfType("*team_member.TeamMember")).Return(nil)
 
-	err := usecase.CreateTeam(input)
+	err := usecase.CreateTeam(input, 1)
 
 	assert.NoError(t, err)
-	mockRepo.AssertExpectations(t)
+	teamRepo.AssertExpectations(t)
+	teamMemberRepo.AssertExpectations(t)
 }
 
 func TestGetTeam(t *testing.T) {
 	mockRepo := new(MockTeamRepository)
-	usecase := NewTeamUsecase(mockRepo)
+	usecase := NewTeamUsecase(mockRepo, nil)
 
-	team := &teams.Team{
+	team := &team.Team{
 		TeamID:      1,
 		Name:        "Test Team",
 		Description: "Test Description",
@@ -85,15 +93,15 @@ func TestGetTeam(t *testing.T) {
 
 func TestUpdateTeam(t *testing.T) {
 	mockRepo := new(MockTeamRepository)
-	usecase := NewTeamUsecase(mockRepo)
+	usecase := NewTeamUsecase(mockRepo, nil)
 
-	input := teams.UpdateInput{
+	input := team.UpdateInput{
 		ID:          1,
 		Name:        "updated Test Team",
 		Description: "updated Test Description",
 	}
 
-	mockRepo.On("UpdateTeam", 1, mock.AnythingOfType("*teams.Team")).Return(nil)
+	mockRepo.On("UpdateTeam", 1, mock.AnythingOfType("*team.Team")).Return(nil)
 
 	err := usecase.UpdateTeam(input)
 
@@ -103,7 +111,7 @@ func TestUpdateTeam(t *testing.T) {
 
 func TestDeleteTeam(t *testing.T) {
 	mockRepo := new(MockTeamRepository)
-	usecase := NewTeamUsecase(mockRepo)
+	usecase := NewTeamUsecase(mockRepo, nil)
 
 	mockRepo.On("DeleteTeam", 1).Return(nil)
 
@@ -112,36 +120,11 @@ func TestDeleteTeam(t *testing.T) {
 	assert.NoError(t, err)
 	mockRepo.AssertExpectations(t)
 }
-
-func TestAddMember(t *testing.T) {
-	mockRepo := new(MockTeamRepository)
-	usecase := NewTeamUsecase(mockRepo)
-
-	mockRepo.On("AddMember", 1, 1).Return(nil)
-
-	err := usecase.AddMember(1, 1)
-
-	assert.NoError(t, err)
-	mockRepo.AssertExpectations(t)
-}
-
-func TestRemoveMember(t *testing.T) {
-	mockRepo := new(MockTeamRepository)
-	usecase := NewTeamUsecase(mockRepo)
-
-	mockRepo.On("RemoveMember", 1, 1).Return(nil)
-
-	err := usecase.RemoveMember(1, 1)
-
-	assert.NoError(t, err)
-	mockRepo.AssertExpectations(t)
-}
-
 func TestGetTeamsByCustomerID(t *testing.T) {
 	mockRepo := new(MockTeamRepository)
-	usecase := NewTeamUsecase(mockRepo)
+	usecase := NewTeamUsecase(mockRepo, nil)
 
-	teams := []*teams.Team{
+	teams := []*team.Team{
 		{
 			TeamID:      1,
 			Name:        "Test Team",

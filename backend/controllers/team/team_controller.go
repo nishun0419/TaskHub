@@ -1,8 +1,8 @@
-package teams
+package team
 
 import (
-	domain "backend/domain/teams"
-	usecase "backend/usecase/teams"
+	domain "backend/domain/team"
+	usecase "backend/usecase/team"
 	utils "backend/utils"
 	"strconv"
 
@@ -24,12 +24,18 @@ func (c *TeamController) CreateTeam(ctx *gin.Context) {
 		return
 	}
 
-	if err := c.usecase.CreateTeam(input); err != nil {
+	customerID, ok := ctx.Get("customer_id")
+	if !ok {
+		utils.ErrorResponse("Customer ID not found")
+		return
+	}
+	err := c.usecase.CreateTeam(input, customerID.(int))
+	if err != nil {
 		utils.ErrorResponse(err.Error())
 		return
 	}
 
-	utils.SuccessResponse("Team created successfully", nil)
+	utils.SuccessResponse("チームが作成されました", nil)
 }
 
 func (c *TeamController) GetTeam(ctx *gin.Context) {

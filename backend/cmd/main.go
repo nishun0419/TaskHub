@@ -2,12 +2,14 @@ package main
 
 import (
 	"backend/controllers/customer"
-	teamsController "backend/controllers/teams"
+	teamsController "backend/controllers/team"
 	repository "backend/infrastructure/customer"
-	teamsRepository "backend/infrastructure/teams"
+	teamsRepository "backend/infrastructure/team"
+	teamMemberRepository "backend/infrastructure/team_member"
+	"backend/middleware"
 	"backend/pkg/db"
 	usecase "backend/usecase/customer"
-	teamsUsecase "backend/usecase/teams"
+	teamUsecase "backend/usecase/team"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -21,7 +23,8 @@ func main() {
 	customerController := customer.NewCustomerController(customerUsecase)
 
 	teamRepository := teamsRepository.NewTeamRepository(database)
-	teamUsecase := teamsUsecase.NewTeamUsecase(teamRepository)
+	teamMemberRepository := teamMemberRepository.NewTeamMemberRepository(database)
+	teamUsecase := teamUsecase.NewTeamUsecase(teamRepository, teamMemberRepository)
 	teamController := teamsController.NewTeamController(teamUsecase)
 
 	router := gin.Default()
@@ -37,7 +40,9 @@ func main() {
 	public.POST("/register", customerController.RegisterHandler)
 	public.POST("/login", customerController.LoginHandler)
 
+	// 認証が必要なエンドポイント
 	teams := public.Group("/teams")
+	teams.Use(middleware.AuthMiddleware())
 	teams.POST("", teamController.CreateTeam)
 	teams.GET("/:id", teamController.GetTeam)
 	teams.PUT("/:id", teamController.UpdateTeam)
