@@ -40,8 +40,10 @@ func (r *TeamRepository) RemoveMember(teamID int, customerID int) error {
 	return r.db.Exec("DELETE FROM team_members WHERE team_id = ? AND customer_id = ?", teamID, customerID).Error
 }
 
-func (r *TeamRepository) GetAllTeams() ([]*teams.Team, error) {
+func (r *TeamRepository) GetTeamsByCustomerID(customerID int) ([]*teams.Team, error) {
 	var teams []*teams.Team
-	err := r.db.Find(&teams).Error
+	err := r.db.Joins("JOIN team_members ON teams.id = team_members.team_id").
+		Where("team_members.customer_id = ?", customerID).
+		Find(&teams).Error
 	return teams, err
 }

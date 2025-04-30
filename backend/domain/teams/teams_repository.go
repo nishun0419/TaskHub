@@ -7,5 +7,5 @@ type TeamRepository interface {
 	DeleteTeam(id int) error
 	AddMember(teamID int, customerID int) error
 	RemoveMember(teamID int, customerID int) error
-	GetAllTeams() ([]*Team, error)
+	GetTeamsByCustomerID(customerID int) ([]*Team, error)
 }

@@ -42,8 +42,8 @@ func (m *MockTeamRepository) RemoveMember(teamID int, customerID int) error {
 	return args.Error(0)
 }
 
-func (m *MockTeamRepository) GetAllTeams() ([]*teams.Team, error) {
-	args := m.Called()
+func (m *MockTeamRepository) GetTeamsByCustomerID(customerID int) ([]*teams.Team, error) {
+	args := m.Called(customerID)
 	return args.Get(0).([]*teams.Team), args.Error(1)
 }
 
@@ -137,7 +137,7 @@ func TestRemoveMember(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 }
 
-func TestGetAllTeams(t *testing.T) {
+func TestGetTeamsByCustomerID(t *testing.T) {
 	mockRepo := new(MockTeamRepository)
 	usecase := NewTeamUsecase(mockRepo)
 
@@ -153,10 +153,9 @@ func TestGetAllTeams(t *testing.T) {
 			Description: "Test Description 2",
 		},
 	}
+	mockRepo.On("GetTeamsByCustomerID", 1).Return(teams, nil)
 
-	mockRepo.On("GetAllTeams").Return(teams, nil)
-
-	result, err := usecase.GetAllTeams()
+	result, err := usecase.GetTeamsByCustomerID(1)
 
 	assert.NoError(t, err)
 	assert.Equal(t, teams, result)

@@ -60,6 +60,6 @@ func (u *TeamUsecase) RemoveMember(teamID int, customerID int) error {
 	return nil
 }
 
-func (u *TeamUsecase) GetAllTeams() ([]*teams.Team, error) {
-	return u.TeamRepository.GetAllTeams()
+func (u *TeamUsecase) GetTeamsByCustomerID(customerID int) ([]*teams.Team, error) {
+	return u.TeamRepository.GetTeamsByCustomerID(customerID)
 }
