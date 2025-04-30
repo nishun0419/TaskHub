@@ -10,8 +10,8 @@ type TeamRepository struct {
 	db *gorm.DB
 }
 
-func NewTeamRepository() teams.TeamRepository {
-	return &TeamRepository{}
+func NewTeamRepository(db *gorm.DB) *TeamRepository {
+	return &TeamRepository{db: db}
 }
 
 func (r *TeamRepository) CreateTeam(team *teams.Team) error {

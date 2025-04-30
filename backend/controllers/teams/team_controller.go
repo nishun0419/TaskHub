@@ -10,11 +10,11 @@ import (
 )
 
 type TeamController struct {
-	usecase usecase.TeamUsecase
+	usecase *usecase.TeamUsecase
 }
 
-func NewTeamController(usecase usecase.TeamUsecase) *TeamController {
-	return &TeamController{usecase: usecase}
+func NewTeamController(u *usecase.TeamUsecase) *TeamController {
+	return &TeamController{usecase: u}
 }
 
 func (c *TeamController) CreateTeam(ctx *gin.Context) {
