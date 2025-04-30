@@ -24,8 +24,8 @@ func (u *TeamUsecase) CreateTeam(input teams.CreateInput) error {
 	return nil
 }
 
-func (u *TeamUsecase) GetTeam(id teams.TeamID) (*teams.Team, error) {
-	return u.TeamRepository.GetTeam(id.ID)
+func (u *TeamUsecase) GetTeam(id int) (*teams.Team, error) {
+	return u.TeamRepository.GetTeam(id)
 }
 
 func (u *TeamUsecase) UpdateTeam(input teams.UpdateInput) error {

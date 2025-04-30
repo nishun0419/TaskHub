@@ -69,7 +69,7 @@ func TestGetTeam(t *testing.T) {
 	usecase := NewTeamUsecase(mockRepo)
 
 	team := &teams.Team{
-		ID:          1,
+		TeamID:      1,
 		Name:        "Test Team",
 		Description: "Test Description",
 	}
@@ -143,12 +143,12 @@ func TestGetTeamsByCustomerID(t *testing.T) {
 
 	teams := []*teams.Team{
 		{
-			ID:          1,
+			TeamID:      1,
 			Name:        "Test Team",
 			Description: "Test Description",
 		},
 		{
-			ID:          2,
+			TeamID:      2,
 			Name:        "Test Team 2",
 			Description: "Test Description 2",
 		},
