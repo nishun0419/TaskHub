@@ -41,12 +41,12 @@ func main() {
 	public.POST("/login", customerController.LoginHandler)
 
 	// 認証が必要なエンドポイント
-	teams := public.Group("/teams")
+	teams := public.Group("/team")
 	teams.Use(middleware.AuthMiddleware())
 	teams.POST("", teamController.CreateTeam)
 	teams.GET("/:id", teamController.GetTeam)
 	teams.PUT("/:id", teamController.UpdateTeam)
 	teams.DELETE("/:id", teamController.DeleteTeam)
-
+	teams.GET("", teamController.GetTeamsByCustomerID)
 	router.Run(":8080")
 }

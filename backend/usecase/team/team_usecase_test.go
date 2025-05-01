@@ -131,7 +131,7 @@ func TestGetTeamsByCustomerID(t *testing.T) {
 			Description: "Test Description",
 		},
 		{
-			TeamID:      2,
+			TeamID:      1,
 			Name:        "Test Team 2",
 			Description: "Test Description 2",
 		},

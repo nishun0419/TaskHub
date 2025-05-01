@@ -34,7 +34,7 @@ func (r *TeamRepository) DeleteTeam(id int) error {
 
 func (r *TeamRepository) GetTeamsByCustomerID(customerID int) ([]*team.Team, error) {
 	var teams []*team.Team
-	err := r.db.Joins("JOIN team_members ON teams.id = team_members.team_id").
+	err := r.db.Joins("JOIN team_members ON teams.team_id = team_members.team_id").
 		Where("team_members.customer_id = ?", customerID).
 		Find(&teams).Error
 	return teams, err

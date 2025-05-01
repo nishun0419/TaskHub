@@ -4,6 +4,7 @@ import (
 	domain "backend/domain/team"
 	usecase "backend/usecase/team"
 	utils "backend/utils"
+	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -82,4 +83,21 @@ func (c *TeamController) DeleteTeam(ctx *gin.Context) {
 	}
 
 	utils.SuccessResponse("Team deleted successfully", nil)
+}
+
+func (c *TeamController) GetTeamsByCustomerID(ctx *gin.Context) {
+	customerID, ok := ctx.Get("customer_id")
+	if !ok {
+		utils.ErrorResponse("Customer ID not found")
+		return
+	}
+	teams, err := c.usecase.GetTeamsByCustomerID(customerID.(int))
+	if err != nil {
+		utils.ErrorResponse(err.Error())
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data":    teams,
+	})
 }

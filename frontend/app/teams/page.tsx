@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation';
 import { API_ENDPOINTS } from '@/constants/api';
 
 interface Team {
-  id: number;
-  name: string;
-  description?: string;
-  created_at: string;
+  TeamID: number;
+  Name: string;
+  Description?: string;
+  CreatedAt: string;
+  UpdatedAt: string;
 }
 
 export default function TeamsPage() {
@@ -34,9 +35,8 @@ export default function TeamsPage() {
         if (!response.ok) {
           throw new Error('チームの取得に失敗しました');
         }
-
         const data = await response.json();
-        setTeams(data);
+        setTeams(data.data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'チームの取得に失敗しました');
       }
@@ -72,15 +72,15 @@ export default function TeamsPage() {
             ) : (
               <ul className="divide-y divide-gray-200">
                 {teams.map((team) => (
-                  <li key={team.id}>
+                  <li key={team.TeamID}>
                     <a
-                      href={`/teams/${team.id}`}
+                      href={`/teams/${team.TeamID}`}
                       className="block hover:bg-gray-50"
                     >
                       <div className="px-4 py-4 sm:px-6">
                         <div className="flex items-center justify-between">
                           <p className="text-sm font-medium text-indigo-600 truncate">
-                            {team.name}
+                            {team.Name}
                           </p>
                           <div className="ml-2 flex-shrink-0 flex">
                             <p className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
@@ -88,11 +88,11 @@ export default function TeamsPage() {
                             </p>
                           </div>
                         </div>
-                        {team.description && (
+                        {team.Description && (
                           <div className="mt-2 sm:flex sm:justify-between">
                             <div className="sm:flex">
                               <p className="flex items-center text-sm text-gray-500">
-                                {team.description}
+                                {team.Description}
                               </p>
                             </div>
                           </div>
