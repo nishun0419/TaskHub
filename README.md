@@ -91,7 +91,7 @@ Go【Gin】をバックエンド、Next.js【14】をフロントエンドとし
 |:--|:--|
 | customers | ユーザー情報 (ID, メール, パスワード, 名前) |
 | teams | チーム情報 (ID, チーム名, 説明) |
-| team_members | チームメンバー管理 (team_id, user_id) |
+| team_members | チームメンバー管理 (team_id, user_id,role) |
 | todos | TODO情報 (ID, title, completed, team_id, user_id) |
 
 ---
