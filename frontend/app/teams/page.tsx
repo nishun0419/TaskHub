@@ -5,11 +5,10 @@ import { useRouter } from 'next/navigation';
 import { API_ENDPOINTS } from '@/constants/api';
 
 interface Team {
-  TeamID: number;
-  Name: string;
-  Description?: string;
-  CreatedAt: string;
-  UpdatedAt: string;
+  team_id: number;
+  name: string;
+  description?: string;
+  role: string;
 }
 
 export default function TeamsPage() {
@@ -35,7 +34,9 @@ export default function TeamsPage() {
         if (!response.ok) {
           throw new Error('チームの取得に失敗しました');
         }
+        console.log(response);
         const data = await response.json();
+        console.log(data.data);
         setTeams(data.data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'チームの取得に失敗しました');
@@ -72,27 +73,27 @@ export default function TeamsPage() {
             ) : (
               <ul className="divide-y divide-gray-200">
                 {teams.map((team) => (
-                  <li key={team.TeamID}>
+                  <li key={team.team_id}>
                     <a
-                      href={`/teams/${team.TeamID}`}
+                      href={`/teams/${team.team_id}`}
                       className="block hover:bg-gray-50"
                     >
                       <div className="px-4 py-4 sm:px-6">
                         <div className="flex items-center justify-between">
                           <p className="text-sm font-medium text-indigo-600 truncate">
-                            {team.Name}
+                            {team.name}
                           </p>
                           <div className="ml-2 flex-shrink-0 flex">
                             <p className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                              メンバー
+                              {team.role}
                             </p>
                           </div>
                         </div>
-                        {team.Description && (
+                        {team.description && (
                           <div className="mt-2 sm:flex sm:justify-between">
                             <div className="sm:flex">
                               <p className="flex items-center text-sm text-gray-500">
-                                {team.Description}
+                                {team.description}
                               </p>
                             </div>
                           </div>

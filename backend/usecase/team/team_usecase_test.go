@@ -37,9 +37,9 @@ func (m *MockTeamRepository) DeleteTeam(id int) error {
 	return args.Error(0)
 }
 
-func (m *MockTeamRepository) GetTeamsByCustomerID(customerID int) ([]*team.Team, error) {
+func (m *MockTeamRepository) GetTeamsByCustomerID(customerID int) ([]*team.TeamWithRole, error) {
 	args := m.Called(customerID)
-	return args.Get(0).([]*team.Team), args.Error(1)
+	return args.Get(0).([]*team.TeamWithRole), args.Error(1)
 }
 
 func (m *MockTeamMemberRepository) AddTeamMember(teamMember *team_member.TeamMember) error {
@@ -120,20 +120,27 @@ func TestDeleteTeam(t *testing.T) {
 	assert.NoError(t, err)
 	mockRepo.AssertExpectations(t)
 }
+
 func TestGetTeamsByCustomerID(t *testing.T) {
 	mockRepo := new(MockTeamRepository)
 	usecase := NewTeamUsecase(mockRepo, nil)
 
-	teams := []*team.Team{
+	teams := []*team.TeamWithRole{
 		{
-			TeamID:      1,
-			Name:        "Test Team",
-			Description: "Test Description",
+			Team: team.Team{
+				TeamID:      1,
+				Name:        "Test Team",
+				Description: "Test Description",
+			},
+			Role: "owner",
 		},
 		{
-			TeamID:      1,
-			Name:        "Test Team 2",
-			Description: "Test Description 2",
+			Team: team.Team{
+				TeamID:      2,
+				Name:        "Test Team 2",
+				Description: "Test Description 2",
+			},
+			Role: "member",
 		},
 	}
 	mockRepo.On("GetTeamsByCustomerID", 1).Return(teams, nil)

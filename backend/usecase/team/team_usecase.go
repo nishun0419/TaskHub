@@ -56,6 +56,6 @@ func (u *TeamUsecase) DeleteTeam(id int) error {
 	}
 	return nil
 }
-func (u *TeamUsecase) GetTeamsByCustomerID(customerID int) ([]*team.Team, error) {
+func (u *TeamUsecase) GetTeamsByCustomerID(customerID int) ([]*team.TeamWithRole, error) {
 	return u.TeamRepository.GetTeamsByCustomerID(customerID)
 }
