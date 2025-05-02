@@ -1,34 +1,7 @@
 'use client';
-
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 export default function Home() {
-  const { status } = useSession();
-  const router = useRouter();
-  const [storedUser, setStoredUser] = useState<string | null>(null);
-
-  useEffect(() => {
-    const user = localStorage.getItem('user');
-    setStoredUser(user);
-  }, []);
-
-  useEffect(() => {
-    if (status === 'authenticated' || storedUser) {
-      router.push('/mypage');
-    }
-  }, [status, storedUser, router]);
-
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-purple-500"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="bg-white">
       {/* Hero section */}
