@@ -2,10 +2,20 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useState, useEffect } from 'react';
 
 export default function Header() {
   const pathname = usePathname();
-  const isLoggedIn = false; // TODO: ログイン状態の管理を実装
+  const { status } = useSession();
+  const [storedUser, setStoredUser] = useState<string | null>(null);
+
+  useEffect(() => {
+    const user = localStorage.getItem('user');
+    setStoredUser(user);
+  }, [status]);
+
+  const isLoggedIn = status === 'authenticated' || storedUser;
 
   return (
     <header className="bg-white shadow">
