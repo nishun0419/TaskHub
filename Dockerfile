@@ -16,11 +16,11 @@ COPY backend/ .
 RUN go build -o main ./cmd/main.go
 
 # エントリポイントスクリプトをコピーして実行権限を付与
-COPY backend/docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+COPY backend/railway-start.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/railway-start.sh
 
 # エントリポイントを設定
-ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["railway-start.sh"]
 
 # ポートを公開
 EXPOSE 8080
