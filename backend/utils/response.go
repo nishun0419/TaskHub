@@ -1,22 +1,22 @@
 package utils
 
-type Response struct {
-	Success bool        `json:"success"`
-	Message interface{} `json:"message"`
-	Data    interface{} `json:"data,omitempty"`
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
+
+func SuccessResponse(c *gin.Context, message string, data interface{}) {
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": message,
+		"data":    data,
+	})
 }
 
-func SuccessResponse(message string, data interface{}) Response {
-	return Response{
-		Success: true,
-		Message: message,
-		Data:    data,
-	}
-}
-
-func ErrorResponse(message interface{}) Response {
-	return Response{
-		Success: false,
-		Message: message,
-	}
+func ErrorResponse(c *gin.Context, message interface{}) {
+	c.JSON(http.StatusInternalServerError, gin.H{
+		"success": false,
+		"message": message,
+	})
 }

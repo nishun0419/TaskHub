@@ -51,7 +51,6 @@ func (m *MockTeamMemberRepository) DeleteTeamMember(teamMemberDelInput *team_mem
 	args := m.Called(teamMemberDelInput)
 	return args.Error(0)
 }
-
 func TestCreateTeam(t *testing.T) {
 	teamRepo := new(MockTeamRepository)
 	teamMemberRepo := new(MockTeamMemberRepository)

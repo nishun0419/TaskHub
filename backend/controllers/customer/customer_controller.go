@@ -81,14 +81,14 @@ func (c *CustomerController) RegisterHandler(ctx *gin.Context) {
 			errorMessages = append(errorMessages, "リクエストを正常に受け付けることができませんでした。")
 		}
 
-		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse(errorMessages))
+		utils.ErrorResponse(ctx, errorMessages)
 		return
 	}
 
 	if err := c.Usecase.RegisterCustomer(input); err != nil {
-		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse(err.Error()))
+		utils.ErrorResponse(ctx, err.Error())
 		return
 	}
 
-	ctx.JSON(http.StatusOK, utils.SuccessResponse("登録が完了しました。", nil))
+	utils.SuccessResponse(ctx, "登録が完了しました。", nil)
 }

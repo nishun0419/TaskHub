@@ -10,6 +10,11 @@ Go【Gin】をバックエンド、Next.js【14】をフロントエンドとし
 ユーザーはログイン後、チームを作成し、
 チームメンバーとTODOを共有・管理できる。
 
+チーム作成
+![Image](https://github.com/user-attachments/assets/0d2322ec-df2d-4f2f-8f8b-b651e294d18f)
+TODO追加
+![Image](https://github.com/user-attachments/assets/5cfffa56-9be2-4349-9277-1231dcc1206e)
+
 ---
 
 ## 2. 対象ユーザー
