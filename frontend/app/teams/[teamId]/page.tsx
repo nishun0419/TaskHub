@@ -11,6 +11,7 @@ interface Todo {
   completed: boolean;
   due_date?: string;
   assigned_to?: string;
+  customer_id: number;
 }
 
 interface Team {
@@ -77,6 +78,7 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: n
 
         const todosData = await todosResponse.json();
         setTodos(todosData.data);
+        console.log(todosData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'データの取得に失敗しました');
       }
@@ -318,12 +320,14 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: n
                             <option value="0">未完了</option>
                             <option value="1">完了</option>
                           </select>
-                          <button
-                            onClick={() => handleDeleteTodo(todo.todo_id)}
-                            className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 hover:bg-red-200"
-                          >
-                            削除
-                          </button>
+                          {todo.customer_id === JSON.parse(localStorage.getItem('user') || '{}').customer_id && (
+                            <button
+                              onClick={() => handleDeleteTodo(todo.todo_id)}
+                              className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 hover:bg-red-200"
+                            >
+                              削除
+                            </button>
+                          )}
                           {todo.due_date && (
                             <span className="text-sm text-gray-500">
                               期限: {new Date(todo.due_date).toLocaleDateString()}
