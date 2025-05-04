@@ -65,10 +65,11 @@ func main() {
 	todo := public.Group("/todo")
 	todo.Use(middleware.AuthMiddleware())
 	todo.POST("/team/:team_id", todoController.CreateTodo)
-	todo.GET("/:id", todoController.GetTodo)
+	todo.GET("/:todo_id", todoController.GetTodo)
 	todo.GET("/team/:team_id", todoController.GetTodosByTeamID)
-	todo.PUT("/:id", todoController.UpdateTodo)
-	todo.DELETE("/:id", todoController.DeleteTodo)
+	todo.PUT("/:todo_id", todoController.UpdateTodo)
+	todo.PUT("/:todo_id/status", todoController.ChangeStatus)
+	todo.DELETE("/:todo_id", todoController.DeleteTodo)
 
 	router.Run(":8080")
 }
