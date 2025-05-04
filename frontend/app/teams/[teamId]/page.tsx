@@ -129,23 +129,35 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: n
         router.push('/login');
         return;
       }
-
-      const response = await fetch(`${API_ENDPOINTS.TEAM_TODO(resolvedParams.teamId)}/${selectedTodo.todo_id}`, {
+      const response = await fetch(`${API_ENDPOINTS.TODO(selectedTodo.todo_id)}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description,
+          completed: Boolean(formData.completed)
+        }),
       });
-
+      console.log('Request payload:', {
+        title: formData.title,
+        description: formData.description,
+        completed: Boolean(formData.completed)
+      });
       if (!response.ok) {
-        throw new Error('TODOの更新に失敗しました');
+        const errorData = await response.json();
+        throw new Error(errorData.message);
       }
 
-      const updatedTodo = await response.json();
       setTodos(todos.map(todo => 
-        todo.todo_id === selectedTodo.todo_id ? updatedTodo.data : todo
+        todo.todo_id === selectedTodo.todo_id ? {
+          ...todo,
+          title: formData.title,
+          description: formData.description,
+          completed: formData.completed ?? todo.completed
+        } : todo
       ));
       setIsEditModalOpen(false);
       setSelectedTodo(null);
@@ -163,22 +175,25 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: n
         return;
       }
 
-      const response = await fetch(`${API_ENDPOINTS.TEAM_TODO(resolvedParams.teamId)}/${todoId}`, {
+
+      const response = await fetch(`${API_ENDPOINTS.TODO_STATUS_CHANGE(todoId)}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ completed: newStatus }),
+        body: JSON.stringify({ completed: newStatus}),
       });
 
       if (!response.ok) {
         throw new Error('ステータスの更新に失敗しました');
       }
 
-      const updatedTodo = await response.json();
       setTodos(todos.map(todo => 
-        todo.todo_id === todoId ? updatedTodo.data : todo
+        todo.todo_id === todoId ? {
+          ...todo,
+          completed: newStatus
+        } : todo
       ));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'ステータスの更新に失敗しました');
@@ -267,7 +282,9 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: n
                           <select
                             value={todo.completed ? "1" : "0"}
                             onChange={(e) => handleStatusChange(todo.todo_id, e.target.value === "1")}
-                            className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800"
+                            className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                              todo.completed ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                            }`}
                           >
                             <option value="0">未完了</option>
                             <option value="1">完了</option>

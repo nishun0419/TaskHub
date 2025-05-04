@@ -2,6 +2,7 @@ package todo
 
 import (
 	"backend/domain/todo"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -34,10 +35,25 @@ func (r *TodoRepository) GetTeamTodos(teamID int) ([]*todo.Todo, error) {
 	return todos, nil
 }
 
-func (r *TodoRepository) Update(id int, input *todo.TodoUpdate) error {
-	return r.db.Model(&todo.Todo{}).Where("todo_id = ?", id).Updates(input).Error
+func (r *TodoRepository) Update(id int, input *todo.Todo) error {
+	updates := map[string]interface{}{
+		"title":       input.Title,
+		"description": input.Description,
+		"completed":   input.Completed,
+		"team_id":     input.TeamID,
+		"updated_at":  time.Now(),
+	}
+	return r.db.Model(&todo.Todo{}).Where("todo_id = ?", id).Updates(updates).Error
 }
 
 func (r *TodoRepository) Delete(id int) error {
 	return r.db.Delete(&todo.Todo{}, "todo_id = ?", id).Error
+}
+
+func (r *TodoRepository) ChangeStatus(todoID int, completed bool) error {
+	updates := map[string]interface{}{
+		"completed":  completed,
+		"updated_at": time.Now(),
+	}
+	return r.db.Model(&todo.Todo{}).Where("todo_id = ?", todoID).Updates(updates).Error
 }

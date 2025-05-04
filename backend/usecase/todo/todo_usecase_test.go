@@ -29,13 +29,18 @@ func (m *MockTodoRepository) GetTeamTodos(teamID int) ([]*todo.Todo, error) {
 	return args.Get(0).([]*todo.Todo), args.Error(1)
 }
 
-func (m *MockTodoRepository) Update(todoID int, input *todo.TodoUpdate) error {
-	args := m.Called(todoID, input)
+func (m *MockTodoRepository) Update(todoID int, todo *todo.Todo) error {
+	args := m.Called(todoID, todo)
 	return args.Error(0)
 }
 
 func (m *MockTodoRepository) Delete(id int) error {
 	args := m.Called(id)
+	return args.Error(0)
+}
+
+func (m *MockTodoRepository) ChangeStatus(todoID int, completed bool) error {
+	args := m.Called(todoID, completed)
 	return args.Error(0)
 }
 
@@ -106,16 +111,46 @@ func TestUpdate(t *testing.T) {
 	repo := new(MockTodoRepository)
 	usecase := NewTodoUsecase(repo)
 
-	input := &todo.TodoUpdate{
+	input := &todo.Todo{
 		Title:       "Test Todo 1",
 		Description: "Test Description 1",
 		CustomerID:  1,
+		TeamID:      1,
+		Completed:   false,
 	}
 
+	repo.On("GetByID", 1).Return(input, nil)
 	repo.On("Update", 1, input).Return(nil)
 
 	err := usecase.Update(1, input)
 	assert.NoError(t, err)
+
+	repo.AssertExpectations(t)
+}
+
+func TestUpdateUnauthorized(t *testing.T) {
+	repo := new(MockTodoRepository)
+	usecase := NewTodoUsecase(repo)
+
+	wrongTodo := &todo.Todo{
+		Title:       "Test Todo 1",
+		Description: "Test Description 1",
+		CustomerID:  2,
+		TeamID:      1,
+		Completed:   false,
+	}
+	input := &todo.Todo{
+		Title:       "Test Todo 1",
+		Description: "Test Description 1",
+		CustomerID:  1,
+		TeamID:      1,
+		Completed:   false,
+	}
+
+	repo.On("GetByID", 1).Return(wrongTodo, nil)
+
+	err := usecase.Update(1, input)
+	assert.Error(t, err)
 
 	repo.AssertExpectations(t)
 }
@@ -128,6 +163,43 @@ func TestDelete(t *testing.T) {
 
 	err := usecase.Delete(1)
 	assert.NoError(t, err)
+
+	repo.AssertExpectations(t)
+}
+
+func TestChangeStatus(t *testing.T) {
+	repo := new(MockTodoRepository)
+	usecase := NewTodoUsecase(repo)
+
+	repo.On("ChangeStatus", 1, true).Return(nil)
+	repo.On("GetByID", 1).Return(&todo.Todo{
+		TodoID:      1,
+		Title:       "Test Todo 1",
+		Description: "Test Description 1",
+		TeamID:      1,
+		CustomerID:  1,
+	}, nil)
+	err := usecase.ChangeStatus(1, 1, true)
+
+	assert.NoError(t, err)
+
+	repo.AssertExpectations(t)
+}
+
+func TestChangeStatusUnauthorized(t *testing.T) {
+	repo := new(MockTodoRepository)
+	usecase := NewTodoUsecase(repo)
+
+	repo.On("GetByID", 1).Return(&todo.Todo{
+		TodoID:      1,
+		Title:       "Test Todo 1",
+		Description: "Test Description 1",
+		TeamID:      1,
+		CustomerID:  2,
+	}, nil)
+
+	err := usecase.ChangeStatus(1, 1, true)
+	assert.Error(t, err)
 
 	repo.AssertExpectations(t)
 }

@@ -45,7 +45,11 @@ func (tc *TodoController) CreateTodo(c *gin.Context) {
 }
 
 func (tc *TodoController) GetTodo(c *gin.Context) {
-	todoID := c.GetInt("todo_id")
+	todoID, err := strconv.Atoi(c.Param("todo_id"))
+	if err != nil {
+		utils.ErrorResponse(c, "Invalid todo ID")
+		return
+	}
 	todo, err := tc.todoUsecase.GetByID(todoID)
 	if err != nil {
 		utils.ErrorResponse(c, err.Error())
@@ -71,14 +75,28 @@ func (tc *TodoController) GetTodosByTeamID(c *gin.Context) {
 func (tc *TodoController) UpdateTodo(c *gin.Context) {
 	todoID, err := strconv.Atoi(c.Param("todo_id"))
 	if err != nil {
-		utils.ErrorResponse(c, "Invalid team ID")
+		utils.ErrorResponse(c, "Invalid todo ID")
 		return
 	}
-	var input domain.TodoUpdate
+
+	// 既存のTODOを取得
+	existingTodo, err := tc.todoUsecase.GetByID(todoID)
+	if err != nil {
+		utils.ErrorResponse(c, err.Error())
+		return
+	}
+
+	var input domain.Todo
 	if err := c.ShouldBindJSON(&input); err != nil {
 		utils.ErrorResponse(c, err.Error())
 		return
 	}
+
+	// 必要な情報を設定
+	customerID := c.GetInt("customer_id")
+	input.CustomerID = customerID
+	input.TeamID = existingTodo.TeamID
+	input.TodoID = todoID
 
 	if err := tc.todoUsecase.Update(todoID, &input); err != nil {
 		utils.ErrorResponse(c, err.Error())
@@ -90,7 +108,7 @@ func (tc *TodoController) UpdateTodo(c *gin.Context) {
 func (tc *TodoController) DeleteTodo(c *gin.Context) {
 	todoID, err := strconv.Atoi(c.Param("todo_id"))
 	if err != nil {
-		utils.ErrorResponse(c, "Invalid team ID")
+		utils.ErrorResponse(c, "Invalid todo ID")
 		return
 	}
 	if err := tc.todoUsecase.Delete(todoID); err != nil {
@@ -98,4 +116,25 @@ func (tc *TodoController) DeleteTodo(c *gin.Context) {
 		return
 	}
 	utils.SuccessResponse(c, "Todo deleted successfully", nil)
+}
+
+func (tc *TodoController) ChangeStatus(c *gin.Context) {
+	todoID, err := strconv.Atoi(c.Param("todo_id"))
+	if err != nil {
+		utils.ErrorResponse(c, "Invalid todo ID")
+		return
+	}
+
+	var input domain.ChangeStatusInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.ErrorResponse(c, err.Error())
+		return
+	}
+
+	customerID := c.GetInt("customer_id")
+	if err := tc.todoUsecase.ChangeStatus(todoID, customerID, input.Completed); err != nil {
+		utils.ErrorResponse(c, err.Error())
+		return
+	}
+	utils.SuccessResponse(c, "Todo status updated successfully", nil)
 }
