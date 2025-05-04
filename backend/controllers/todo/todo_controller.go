@@ -111,7 +111,8 @@ func (tc *TodoController) DeleteTodo(c *gin.Context) {
 		utils.ErrorResponse(c, "Invalid todo ID")
 		return
 	}
-	if err := tc.todoUsecase.Delete(todoID); err != nil {
+	customerID := c.GetInt("customer_id")
+	if err := tc.todoUsecase.Delete(todoID, customerID); err != nil {
 		utils.ErrorResponse(c, err.Error())
 		return
 	}

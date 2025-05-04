@@ -200,6 +200,35 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: n
     }
   };
 
+  const handleDeleteTodo = async (todoId: number) => {
+    if (!confirm('本当に削除してもよろしいですか？')) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/login');
+        return;
+      }
+
+      const response = await fetch(`${API_ENDPOINTS.TODO(todoId)}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('TODOの削除に失敗しました');
+      }
+
+      setTodos(todos.filter(todo => todo.todo_id !== todoId));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'TODOの削除に失敗しました');
+    }
+  };
+
   const openEditModal = (todo: Todo) => {
     setSelectedTodo(todo);
     setFormData({
@@ -289,6 +318,12 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: n
                             <option value="0">未完了</option>
                             <option value="1">完了</option>
                           </select>
+                          <button
+                            onClick={() => handleDeleteTodo(todo.todo_id)}
+                            className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 hover:bg-red-200"
+                          >
+                            削除
+                          </button>
                           {todo.due_date && (
                             <span className="text-sm text-gray-500">
                               期限: {new Date(todo.due_date).toLocaleDateString()}

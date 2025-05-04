@@ -36,10 +36,16 @@ func (u *TodoUsecase) Update(todoID int, input *todo.Todo) error {
 	return u.todoRepository.Update(todoID, input)
 }
 
-func (u *TodoUsecase) Delete(id int) error {
-	return u.todoRepository.Delete(id)
+func (u *TodoUsecase) Delete(todoID int, customerID int) error {
+	existingTodo, err := u.todoRepository.GetByID(todoID)
+	if err != nil {
+		return err
+	}
+	if existingTodo.CustomerID != customerID {
+		return fmt.Errorf("unauthorized")
+	}
+	return u.todoRepository.Delete(todoID)
 }
-
 func (u *TodoUsecase) ChangeStatus(todoID int, customerID int, completed bool) error {
 	existingTodo, err := u.todoRepository.GetByID(todoID)
 	if err != nil {
