@@ -1,18 +1,24 @@
 package team
 
 import (
+	"backend/domain/customer"
 	"backend/domain/team"
 	"backend/domain/team_member"
 	"fmt"
+	"os"
+	"time"
+
+	"github.com/golang-jwt/jwt/v4"
 )
 
 type TeamUsecase struct {
 	TeamRepository       team.TeamRepository
 	TeamMemberRepository team_member.TeamMemberRepository
+	CustomerRepository   customer.CustomerRepository
 }
 
-func NewTeamUsecase(repo team.TeamRepository, teamMemberRepo team_member.TeamMemberRepository) *TeamUsecase {
-	return &TeamUsecase{repo, teamMemberRepo}
+func NewTeamUsecase(repo team.TeamRepository, teamMemberRepo team_member.TeamMemberRepository, customerRepo customer.CustomerRepository) *TeamUsecase {
+	return &TeamUsecase{repo, teamMemberRepo, customerRepo}
 }
 
 func (u *TeamUsecase) CreateTeam(input team.CreateInput, customerID int) error {
@@ -58,4 +64,51 @@ func (u *TeamUsecase) DeleteTeam(id int) error {
 }
 func (u *TeamUsecase) GetTeamsByCustomerID(customerID int) ([]*team.TeamWithRole, error) {
 	return u.TeamRepository.GetTeamsByCustomerID(customerID)
+}
+
+func (u *TeamUsecase) GenerateInviteToken(input team.InviteTokenInput) (string, error) {
+	customer, err := u.CustomerRepository.FindByEmail(input.Mail)
+	if err != nil {
+		return "", fmt.Errorf("failed to find customer by email: %w", err)
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"customer_id": customer.CustomerID,
+		"team_id":     input.TeamID,
+		"exp":         time.Now().Add(time.Hour * 24).Unix(),
+	})
+	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+}
+
+func (u *TeamUsecase) JoinTeam(customerID int, input team.JoinTeamInput) error {
+	token, err := jwt.Parse(input.Token, func(token *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("JWT_SECRET")), nil
+	})
+	if err != nil {
+		return fmt.Errorf("failed to parse token: %w", err)
+	}
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		return fmt.Errorf("invalid token")
+	}
+	addCustomerID := int(claims["customer_id"].(float64))
+	if addCustomerID != customerID {
+		return fmt.Errorf("invalid customer ID")
+	}
+	teamID := int(claims["team_id"].(float64))
+	team, err := u.TeamRepository.GetTeam(teamID)
+	if err != nil {
+		return fmt.Errorf("failed to get team: %w", err)
+	}
+	if team == nil {
+		return fmt.Errorf("team not found")
+	}
+	teamMember := &team_member.TeamMember{
+		TeamID:     teamID,
+		CustomerID: addCustomerID,
+		Role:       "member",
+	}
+	if err := u.TeamMemberRepository.AddTeamMember(teamMember); err != nil {
+		return fmt.Errorf("failed to add team member: %w", err)
+	}
+	return nil
 }

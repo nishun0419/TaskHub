@@ -28,7 +28,7 @@ func main() {
 
 	teamRepository := teamsRepository.NewTeamRepository(database)
 	teamMemberRepository := teamMemberRepository.NewTeamMemberRepository(database)
-	teamUsecase := teamUsecase.NewTeamUsecase(teamRepository, teamMemberRepository)
+	teamUsecase := teamUsecase.NewTeamUsecase(teamRepository, teamMemberRepository, customerRepository)
 	teamController := teamsController.NewTeamController(teamUsecase)
 
 	todoRepository := todoRepository.NewTodoRepository(database)

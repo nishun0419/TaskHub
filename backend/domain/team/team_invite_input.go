@@ -1,4 +1,4 @@
-package team_member
+package team
 
 type InviteTokenInput struct {
 	TeamID int    `json:"team_id"`
