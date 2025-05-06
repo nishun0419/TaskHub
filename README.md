@@ -10,19 +10,23 @@ Go【Gin】をバックエンド、Next.js【14】をフロントエンドとし
 ユーザーはログイン後、チームを作成し、
 チームメンバーとTODOを共有・管理できる。
 
+デプロイ済みで画面の確認も可能です。
+
+https://task-hub-wheat.vercel.app/login
+
+構成図
+![goflow構成図.jpg](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/146391/cdf47a98-ab3b-444e-b75c-1ddb86e5740f.jpeg)
+
 チーム作成
 ![Image](https://github.com/user-attachments/assets/0d2322ec-df2d-4f2f-8f8b-b651e294d18f)
 TODO追加
 ![Image](https://github.com/user-attachments/assets/5cfffa56-9be2-4349-9277-1231dcc1206e)
-
----
 
 ## 2. 対象ユーザー
 
 - 複数人でタスク管理をしたいユーザー
 - チーム単位でプロジェクトを運用したいユーザー
 
----
 
 ## 3. 機能要件
 
@@ -53,7 +57,6 @@ TODO追加
 - チームに新しいメンバーを招待
 - 招待リンク発行 or メール指定
 
----
 
 ## 4. 画面要件
 
@@ -66,7 +69,6 @@ TODO追加
 | チーム詳細ページ | TODO一覧表示、新規追加フォーム |
 | 招待ページ | メール入力、招待ボタン |
 
----
 
 ## 5. 非機能要件
 
@@ -88,7 +90,6 @@ TODO追加
 | 認証 | JWT |
 | インフラ | Docker / Docker Compose、MySQL |
 
----
 
 ## 7. データベース設計 (仮)
 
@@ -98,5 +99,3 @@ TODO追加
 | teams | チーム情報 (ID, チーム名, 説明) |
 | team_members | チームメンバー管理 (team_id, user_id,role) |
 | todos | TODO情報 (ID, title, completed, team_id, user_id) |
-
----
