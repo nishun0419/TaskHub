@@ -2,7 +2,6 @@ package team_member
 
 import (
 	"backend/domain/team_member"
-
 	"testing"
 
 	"github.com/stretchr/testify/assert"
