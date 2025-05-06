@@ -61,6 +61,8 @@ func main() {
 	teams.PUT("/:id", teamController.UpdateTeam)
 	teams.DELETE("/:id", teamController.DeleteTeam)
 	teams.GET("", teamController.GetTeamsByCustomerID)
+	teams.POST("/:team_id/invite", teamController.GenerateInviteToken)
+	teams.POST("/join", teamController.JoinTeam)
 
 	todo := public.Group("/todo")
 	todo.Use(middleware.AuthMiddleware())

@@ -218,9 +218,10 @@ func TestJoinTeam(t *testing.T) {
 	teamRepo.On("GetTeam", 1).Return(&team.Team{TeamID: 1}, nil)
 	teamMemberRepo.On("AddTeamMember", mock.AnythingOfType("*team_member.TeamMember")).Return(nil)
 
-	err := usecase.JoinTeam(1, input)
+	teamID, err := usecase.JoinTeam(1, input)
 
 	assert.NoError(t, err)
+	assert.Equal(t, 1, teamID)
 	teamRepo.AssertExpectations(t)
 	teamMemberRepo.AssertExpectations(t)
 }
@@ -233,9 +234,10 @@ func TestJoinTeam_InvalidToken(t *testing.T) {
 		Token: tokenString,
 	}
 
-	err := usecase.JoinTeam(1, input)
+	teamID, err := usecase.JoinTeam(1, input)
 
 	assert.Error(t, err)
+	assert.Equal(t, 0, teamID)
 	mockRepo.AssertExpectations(t)
 }
 
@@ -252,9 +254,10 @@ func TestJoinTeam_InvalidCustomerID(t *testing.T) {
 		Token: tokenString,
 	}
 
-	err := usecase.JoinTeam(2, input)
+	teamID, err := usecase.JoinTeam(2, input)
 
 	assert.Error(t, err)
+	assert.Equal(t, 0, teamID)
 	mockRepo.AssertExpectations(t)
 }
 
@@ -273,8 +276,9 @@ func TestJoinTeam_TeamNotFound(t *testing.T) {
 	}
 	teamRepo.On("GetTeam", 1).Return(nil, errors.New("team not found"))
 
-	err := usecase.JoinTeam(1, input)
+	teamID, err := usecase.JoinTeam(1, input)
 
 	assert.Error(t, err)
+	assert.Equal(t, 0, teamID)
 	teamRepo.AssertExpectations(t)
 }

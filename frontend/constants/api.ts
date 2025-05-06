@@ -9,5 +9,6 @@ export const API_ENDPOINTS = {
   TODO: (id: number) => `${API_BASE_URL}/api/todo/${id}`,
   TODO_STATUS_CHANGE: (id: number) => `${API_BASE_URL}/api/todo/${id}/status`,
   TEAM_INVITE: (id: number) => `${API_BASE_URL}/api/team/${id}/invite`,
+  TEAM_JOIN: `${API_BASE_URL}/api/team/join`,
   // 他のエンドポイントもここに追加できます
 } as const; 

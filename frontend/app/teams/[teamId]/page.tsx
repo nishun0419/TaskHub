@@ -27,6 +27,11 @@ interface TodoFormData {
   completed?: boolean;
 }
 
+interface InviteResponse {
+  data: string;
+  message: string;
+}
+
 export default function TeamDetailPage({ params }: { params: Promise<{ teamId: number }> }) {
   const resolvedParams = use(params);
   const router = useRouter();
@@ -35,6 +40,9 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: n
   const [error, setError] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteToken, setInviteToken] = useState<string | null>(null);
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
   const [formData, setFormData] = useState<TodoFormData>({
     title: '',
@@ -278,10 +286,16 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: n
                 {team.description}
               </p>
             )}
-            <div className="mt-2">
+            <div className="mt-2 flex justify-between items-center">
               <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                 {team.role}
               </span>
+              <button
+                onClick={() => setIsInviteModalOpen(true)}
+                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium"
+              >
+                チームに招待
+              </button>
             </div>
           </div>
 
@@ -448,6 +462,95 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: n
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Invite Modal */}
+      {isInviteModalOpen && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-lg font-medium mb-4">チームに招待</h3>
+            {!inviteToken ? (
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                try {
+                  const token = localStorage.getItem('token');
+                  if (!token) {
+                    router.push('/login');
+                    return;
+                  }
+
+                  const response = await fetch(API_ENDPOINTS.TEAM_INVITE(resolvedParams.teamId), {
+                    method: 'POST',
+                    headers: {
+                      'Authorization': `Bearer ${token}`,
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ mail: inviteEmail }),
+                  });
+
+                  if (!response.ok) {
+                    throw new Error('招待の送信に失敗しました');
+                  }
+                  const data: InviteResponse = await response.json();
+                  setInviteToken(data.data);
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : '招待の送信に失敗しました');
+                }
+              }}>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700">メールアドレス</label>
+                  <input
+                    type="email"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+                <div className="flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsInviteModalOpen(false);
+                      setInviteEmail('');
+                      setInviteToken(null);
+                    }}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                  >
+                    キャンセル
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 text-sm font-medium text-white bg-green-500 hover:bg-green-600 rounded-md"
+                  >
+                    招待を送信
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div>
+                <p className="mb-4 text-sm text-gray-600">以下の招待URLを共有してください：</p>
+                <div className="bg-gray-50 p-3 rounded-md break-all">
+                  <code className="text-sm">
+                    {`${window.location.origin}/join?token=${inviteToken}`}
+                  </code>
+                </div>
+                <div className="mt-4 flex justify-end">
+                  <button
+                    onClick={() => {
+                      setIsInviteModalOpen(false);
+                      setInviteEmail('');
+                      setInviteToken(null);
+                    }}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                  >
+                    閉じる
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

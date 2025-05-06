@@ -20,6 +20,16 @@ export default function MyPage() {
   useEffect(() => {
     if (status === 'loading') return;
 
+    const checkAndRedirect = () => {
+      // 保存された招待URLがあればリダイレクト
+      const inviteUrl = localStorage.getItem('inviteRedirectUrl');
+      if (inviteUrl) {
+        router.push(inviteUrl);
+        return true;
+      }
+      return false;
+    };
+
     if (session) {
       // Googleログインの場合
       setUser({
@@ -27,6 +37,7 @@ export default function MyPage() {
         name: session.user?.name || '',
         image: session.user?.image || '',
       });
+      checkAndRedirect();
     } else {
       // JWTログインの場合
       const storedUser = localStorage.getItem('user');
@@ -38,6 +49,7 @@ export default function MyPage() {
       }
 
       setUser(JSON.parse(storedUser));
+      checkAndRedirect();
     }
   }, [session, status, router]);
 
@@ -49,6 +61,7 @@ export default function MyPage() {
       // JWTログインの場合
       localStorage.removeItem('user');
       localStorage.removeItem('token');
+      localStorage.removeItem('inviteRedirectUrl'); // 招待URLも削除
     }
     router.push('/login');
   };
