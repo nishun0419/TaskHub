@@ -101,3 +101,43 @@ func (c *TeamController) GetTeamsByCustomerID(ctx *gin.Context) {
 		"data":    teams,
 	})
 }
+
+func (c *TeamController) GenerateInviteToken(ctx *gin.Context) {
+	var input domain.InviteTokenInput
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		utils.ErrorResponse(ctx, err.Error())
+		return
+	}
+	teamID := ctx.Param("team_id")
+	teamIDInt, err := strconv.Atoi(teamID)
+	if err != nil {
+		utils.ErrorResponse(ctx, "Invalid team ID")
+		return
+	}
+	input.TeamID = teamIDInt
+	token, err := c.usecase.GenerateInviteToken(input)
+	if err != nil {
+		utils.ErrorResponse(ctx, err.Error())
+		return
+	}
+	utils.SuccessResponse(ctx, "Invite token generated successfully", token)
+}
+
+func (c *TeamController) JoinTeam(ctx *gin.Context) {
+	var input domain.JoinTeamInput
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		utils.ErrorResponse(ctx, err.Error())
+		return
+	}
+	customerID, ok := ctx.Get("customer_id")
+	if !ok {
+		utils.ErrorResponse(ctx, "Customer ID not found")
+		return
+	}
+	teamID, err := c.usecase.JoinTeam(customerID.(int), input)
+	if err != nil {
+		utils.ErrorResponse(ctx, err.Error())
+		return
+	}
+	utils.SuccessResponse(ctx, "Team joined successfully", teamID)
+}

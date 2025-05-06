@@ -160,9 +160,33 @@ func TestDelete(t *testing.T) {
 	usecase := NewTodoUsecase(repo)
 
 	repo.On("Delete", 1).Return(nil)
+	repo.On("GetByID", 1).Return(&todo.Todo{
+		TodoID:      1,
+		Title:       "Test Todo 1",
+		Description: "Test Description 1",
+		TeamID:      1,
+		CustomerID:  1,
+	}, nil)
 
-	err := usecase.Delete(1)
+	err := usecase.Delete(1, 1)
 	assert.NoError(t, err)
+
+	repo.AssertExpectations(t)
+}
+
+func TestDeleteUnauthorized(t *testing.T) {
+	repo := new(MockTodoRepository)
+	usecase := NewTodoUsecase(repo)
+
+	repo.On("GetByID", 1).Return(&todo.Todo{
+		TodoID:      1,
+		Title:       "Test Todo 1",
+		Description: "Test Description 1",
+		TeamID:      1,
+		CustomerID:  2,
+	}, nil)
+	err := usecase.Delete(1, 1)
+	assert.Error(t, err)
 
 	repo.AssertExpectations(t)
 }
