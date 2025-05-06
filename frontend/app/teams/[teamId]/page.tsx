@@ -290,12 +290,14 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: n
               <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                 {team.role}
               </span>
-              <button
-                onClick={() => setIsInviteModalOpen(true)}
-                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
-                チームに招待
-              </button>
+              {team.role === 'owner' && (
+                <button
+                  onClick={() => setIsInviteModalOpen(true)}
+                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium"
+                >
+                  チームに招待
+                </button>
+              )}
             </div>
           </div>
 
