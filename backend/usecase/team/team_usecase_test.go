@@ -40,12 +40,12 @@ func (m *MockTeamRepository) CreateTeam(t *team.Team) error {
 	return args.Error(0)
 }
 
-func (m *MockTeamRepository) GetTeam(id int) (*team.Team, error) {
-	args := m.Called(id)
+func (m *MockTeamRepository) GetTeam(teamID int, customerID int) (*team.TeamWithRole, error) {
+	args := m.Called(teamID, customerID)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*team.Team), args.Error(1)
+	return args.Get(0).(*team.TeamWithRole), args.Error(1)
 }
 
 func (m *MockTeamRepository) UpdateTeam(id int, team *team.Team) error {
@@ -63,9 +63,24 @@ func (m *MockTeamRepository) GetTeamsByCustomerID(customerID int) ([]*team.TeamW
 	return args.Get(0).([]*team.TeamWithRole), args.Error(1)
 }
 
+func (m *MockTeamRepository) GenerateInviteToken(token *team.InviteTokenInput) (*team.Team, error) {
+	args := m.Called(token)
+	return args.Get(0).(*team.Team), args.Error(1)
+}
+
+func (m *MockTeamRepository) JoinTeam(teamID int, customerID int) error {
+	args := m.Called(teamID, customerID)
+	return args.Error(0)
+}
+
 func (m *MockTeamMemberRepository) AddTeamMember(teamMember *team_member.TeamMember) error {
 	args := m.Called(teamMember)
 	return args.Error(0)
+}
+
+func (m *MockTeamMemberRepository) GetTeamMember(customerID int, teamID int) (*team_member.TeamMember, error) {
+	args := m.Called(customerID, teamID)
+	return args.Get(0).(*team_member.TeamMember), args.Error(1)
 }
 
 func (m *MockTeamMemberRepository) DeleteTeamMember(teamMemberDelInput *team_member.TeamMemberDelInput) error {
@@ -94,23 +109,50 @@ func TestCreateTeam(t *testing.T) {
 
 func TestGetTeam(t *testing.T) {
 	mockRepo := new(MockTeamRepository)
-	usecase := NewTeamUsecase(mockRepo, nil, nil)
+	mockTeamMemberRepo := new(MockTeamMemberRepository)
+	usecase := NewTeamUsecase(mockRepo, mockTeamMemberRepo, nil)
 
-	team := &team.Team{
-		TeamID:      1,
-		Name:        "Test Team",
-		Description: "Test Description",
+	team := &team.TeamWithRole{
+		Team: team.Team{
+			TeamID:      1,
+			Name:        "Test Team",
+			Description: "Test Description",
+		},
+		Role: "owner",
 	}
 
-	mockRepo.On("GetTeam", 1).Return(team, nil)
-
-	result, err := usecase.GetTeam(1)
+	mockRepo.On("GetTeam", 1, 1).Return(team, nil)
+	result, err := usecase.GetTeam(1, 1)
 
 	assert.NoError(t, err)
 	assert.Equal(t, team, result)
 	mockRepo.AssertExpectations(t)
 }
 
+func TestGetTeam_TeamNotFound(t *testing.T) {
+	mockRepo := new(MockTeamRepository)
+	mockTeamMemberRepo := new(MockTeamMemberRepository)
+	usecase := NewTeamUsecase(mockRepo, mockTeamMemberRepo, nil)
+	mockRepo.On("GetTeam", 1, 1).Return(nil, errors.New("team not found"))
+
+	_, err := usecase.GetTeam(1, 1)
+
+	assert.Error(t, err)
+	mockRepo.AssertExpectations(t)
+}
+
+func TestGetTeam_TeamMemberNotFound(t *testing.T) {
+	mockRepo := new(MockTeamRepository)
+	mockTeamMemberRepo := new(MockTeamMemberRepository)
+	usecase := NewTeamUsecase(mockRepo, mockTeamMemberRepo, nil)
+	mockRepo.On("GetTeam", 2, 1).Return(nil, errors.New("team not found"))
+
+	_, err := usecase.GetTeam(2, 1)
+
+	assert.Error(t, err)
+	mockRepo.AssertExpectations(t)
+	mockTeamMemberRepo.AssertExpectations(t)
+}
 func TestUpdateTeam(t *testing.T) {
 	mockRepo := new(MockTeamRepository)
 	usecase := NewTeamUsecase(mockRepo, nil, nil)
@@ -215,7 +257,16 @@ func TestJoinTeam(t *testing.T) {
 	input := team.JoinTeamInput{
 		Token: tokenString,
 	}
-	teamRepo.On("GetTeam", 1).Return(&team.Team{TeamID: 1}, nil)
+
+	// モックの戻り値として具体的なTeamWithRoleオブジェクトを作成
+	mockTeam := &team.TeamWithRole{
+		Team: team.Team{
+			TeamID: 1,
+		},
+		Role: "member",
+	}
+
+	teamRepo.On("GetTeam", 1, 1).Return(mockTeam, nil)
 	teamMemberRepo.On("AddTeamMember", mock.AnythingOfType("*team_member.TeamMember")).Return(nil)
 
 	teamID, err := usecase.JoinTeam(1, input)
@@ -274,7 +325,7 @@ func TestJoinTeam_TeamNotFound(t *testing.T) {
 	input := team.JoinTeamInput{
 		Token: tokenString,
 	}
-	teamRepo.On("GetTeam", 1).Return(nil, errors.New("team not found"))
+	teamRepo.On("GetTeam", 1, 1).Return(nil, errors.New("team not found"))
 
 	teamID, err := usecase.JoinTeam(1, input)
 

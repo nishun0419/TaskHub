@@ -41,8 +41,12 @@ func (u *TeamUsecase) CreateTeam(input team.CreateInput, customerID int) error {
 	return nil
 }
 
-func (u *TeamUsecase) GetTeam(id int) (*team.Team, error) {
-	return u.TeamRepository.GetTeam(id)
+func (u *TeamUsecase) GetTeam(teamID int, customerID int) (*team.TeamWithRole, error) {
+	team, err := u.TeamRepository.GetTeam(teamID, customerID)
+	if err != nil || team == nil {
+		return nil, fmt.Errorf("failed to get team: %w", err)
+	}
+	return team, nil
 }
 
 func (u *TeamUsecase) UpdateTeam(input team.UpdateInput) error {
@@ -95,11 +99,11 @@ func (u *TeamUsecase) JoinTeam(customerID int, input team.JoinTeamInput) (int, e
 		return 0, fmt.Errorf("invalid customer ID")
 	}
 	addedTeamID := int(claims["team_id"].(float64))
-	team, err := u.TeamRepository.GetTeam(addedTeamID)
-	if err != nil {
-		return 0, fmt.Errorf("failed to get team: %w", err)
+	team, err := u.TeamRepository.GetTeam(addedTeamID, addCustomerID)
+	if err == nil && team.TeamID != 0 {
+		return 0, fmt.Errorf("team already joined")
 	}
-	if team == nil {
+	if err != nil {
 		return 0, fmt.Errorf("team not found")
 	}
 	teamMember := &team_member.TeamMember{

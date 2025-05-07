@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { API_ENDPOINTS } from '@/constants/api';
 
@@ -15,8 +15,11 @@ export default function TeamsPage() {
   const router = useRouter();
   const [teams, setTeams] = useState<Team[]>([]);
   const [error, setError] = useState('');
+  const hasFetched = useRef(false);
 
   useEffect(() => {
+    if (hasFetched.current) return;
+
     const fetchTeams = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -34,17 +37,16 @@ export default function TeamsPage() {
         if (!response.ok) {
           throw new Error('チームの取得に失敗しました');
         }
-        console.log(response);
         const data = await response.json();
-        console.log(data.data);
         setTeams(data.data);
+        hasFetched.current = true;
       } catch (err) {
         setError(err instanceof Error ? err.message : 'チームの取得に失敗しました');
       }
     };
 
     fetchTeams();
-  }, [router]);
+  }, []); // 依存配列を空にして、初回のみ実行されるようにする
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
