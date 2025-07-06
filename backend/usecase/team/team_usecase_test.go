@@ -48,6 +48,14 @@ func (m *MockTeamRepository) GetTeam(teamID int, customerID int) (*team.TeamWith
 	return args.Get(0).(*team.TeamWithRole), args.Error(1)
 }
 
+func (m *MockTeamRepository) GetTeamByID(id int) (*team.Team, error) {
+	args := m.Called(id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*team.Team), args.Error(1)
+}
+
 func (m *MockTeamRepository) UpdateTeam(id int, team *team.Team) error {
 	args := m.Called(id, team)
 	return args.Error(0)
@@ -87,6 +95,12 @@ func (m *MockTeamMemberRepository) DeleteTeamMember(teamMemberDelInput *team_mem
 	args := m.Called(teamMemberDelInput)
 	return args.Error(0)
 }
+
+func (m *MockTeamMemberRepository) IsTeamMember(teamID int, customerID int) (bool, error) {
+	args := m.Called(teamID, customerID)
+	return args.Get(0).(bool), args.Error(1)
+}
+
 func TestCreateTeam(t *testing.T) {
 	teamRepo := new(MockTeamRepository)
 	teamMemberRepo := new(MockTeamMemberRepository)

@@ -22,6 +22,11 @@ func (m *MockTeamMemberRepository) DeleteTeamMember(teamMemberDelInput *team_mem
 	return args.Error(0)
 }
 
+func (m *MockTeamMemberRepository) IsTeamMember(teamID int, customerID int) (bool, error) {
+	args := m.Called(teamID, customerID)
+	return args.Get(0).(bool), args.Error(1)
+}
+
 func TestAddTeamMember(t *testing.T) {
 	mockRepo := new(MockTeamMemberRepository)
 	usecase := NewTeamMemberUsecase(mockRepo)
