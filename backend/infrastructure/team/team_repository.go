@@ -36,6 +36,15 @@ func (r *TeamRepository) DeleteTeam(id int) error {
 	return r.db.Delete(&team.Team{}, id).Error
 }
 
+func (r *TeamRepository) GetTeamByID(id int) (*team.Team, error) {
+	var team team.Team
+	err := r.db.First(&team, id).Error
+	if err != nil {
+		return nil, err
+	}
+	return &team, nil
+}
+
 func (r *TeamRepository) GetTeamsByCustomerID(customerID int) ([]*team.TeamWithRole, error) {
 	var teams []*team.TeamWithRole
 	err := r.db.Select("teams.*, team_members.role").

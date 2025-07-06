@@ -21,3 +21,11 @@ func (r *TeamMemberRepository) AddTeamMember(teamMember *team_member.TeamMember)
 func (r *TeamMemberRepository) DeleteTeamMember(teamMemberDelInput *team_member.TeamMemberDelInput) error {
 	return r.db.Where("team_id = ? AND customer_id = ?", teamMemberDelInput.TeamID, teamMemberDelInput.CustomerID).Delete(&team_member.TeamMember{}).Error
 }
+
+func (r *TeamMemberRepository) IsTeamMember(teamID int, customerID int) (bool, error) {
+	var count int64
+	err := r.db.Model(&team_member.TeamMember{}).
+		Where("team_id = ? AND customer_id = ?", teamID, customerID).
+		Count(&count).Error
+	return count > 0, err
+}

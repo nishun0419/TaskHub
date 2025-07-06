@@ -99,12 +99,20 @@ func (u *TeamUsecase) JoinTeam(customerID int, input team.JoinTeamInput) (int, e
 		return 0, fmt.Errorf("invalid customer ID")
 	}
 	addedTeamID := int(claims["team_id"].(float64))
-	team, err := u.TeamRepository.GetTeam(addedTeamID, addCustomerID)
-	if err == nil && team.TeamID != 0 {
-		return 0, fmt.Errorf("team already joined")
-	}
+
+	// First, check if the team exists
+	_, err = u.TeamRepository.GetTeamByID(addedTeamID)
 	if err != nil {
-		return 0, fmt.Errorf("team not found")
+		return 0, fmt.Errorf("team not found: %w", err)
+	}
+
+	// Then, check if the user is already a member
+	isMember, err := u.TeamMemberRepository.IsTeamMember(addedTeamID, addCustomerID)
+	if err != nil {
+		return 0, fmt.Errorf("failed to check team membership: %w", err)
+	}
+	if isMember {
+		return 0, fmt.Errorf("already a member of this team")
 	}
 	teamMember := &team_member.TeamMember{
 		TeamID:     addedTeamID,
