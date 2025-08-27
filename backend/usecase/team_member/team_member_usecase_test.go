@@ -2,6 +2,7 @@ package team_member
 
 import (
 	"backend/domain/team_member"
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -45,6 +46,24 @@ func TestAddTeamMember(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 }
 
+func TestAddTeamMember_Error(t *testing.T) {
+	mockRepo := new(MockTeamMemberRepository)
+	usecase := NewTeamMemberUsecase(mockRepo)
+
+	input := team_member.TeamMember{
+		TeamID:     1,
+		CustomerID: 1,
+		Role:       "owner",
+	}
+
+	mockRepo.On("AddTeamMember", mock.AnythingOfType("*team_member.TeamMember")).Return(errors.New("DB error"))
+
+	err := usecase.AddTeamMember(&input)
+
+	assert.Error(t, err)
+	mockRepo.AssertExpectations(t)
+}
+
 func TestDeleteTeamMember(t *testing.T) {
 	mockRepo := new(MockTeamMemberRepository)
 	usecase := NewTeamMemberUsecase(mockRepo)
@@ -59,5 +78,22 @@ func TestDeleteTeamMember(t *testing.T) {
 	err := usecase.DeleteTeamMember(&input)
 
 	assert.NoError(t, err)
+	mockRepo.AssertExpectations(t)
+}
+
+func TestDeleteTeamMember_Error(t *testing.T) {
+	mockRepo := new(MockTeamMemberRepository)
+	usecase := NewTeamMemberUsecase(mockRepo)
+
+	input := team_member.TeamMemberDelInput{
+		TeamID:     1,
+		CustomerID: 1,
+	}
+
+	mockRepo.On("DeleteTeamMember", mock.AnythingOfType("*team_member.TeamMemberDelInput")).Return(errors.New("DB error"))
+
+	err := usecase.DeleteTeamMember(&input)
+
+	assert.Error(t, err)
 	mockRepo.AssertExpectations(t)
 }
