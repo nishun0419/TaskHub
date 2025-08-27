@@ -41,8 +41,12 @@ func (u *TeamUsecase) CreateTeam(input team.CreateInput, customerID int) error {
 	return nil
 }
 
-func (u *TeamUsecase) GetTeam(id int) (*team.Team, error) {
-	return u.TeamRepository.GetTeam(id)
+func (u *TeamUsecase) GetTeam(teamID int, customerID int) (*team.TeamWithRole, error) {
+	team, err := u.TeamRepository.GetTeam(teamID, customerID)
+	if err != nil || team == nil {
+		return nil, fmt.Errorf("failed to get team: %w", err)
+	}
+	return team, nil
 }
 
 func (u *TeamUsecase) UpdateTeam(input team.UpdateInput) error {
@@ -95,12 +99,20 @@ func (u *TeamUsecase) JoinTeam(customerID int, input team.JoinTeamInput) (int, e
 		return 0, fmt.Errorf("invalid customer ID")
 	}
 	addedTeamID := int(claims["team_id"].(float64))
-	team, err := u.TeamRepository.GetTeam(addedTeamID)
+
+	// First, check if the team exists
+	_, err = u.TeamRepository.GetTeamByID(addedTeamID)
 	if err != nil {
-		return 0, fmt.Errorf("failed to get team: %w", err)
+		return 0, fmt.Errorf("team not found: %w", err)
 	}
-	if team == nil {
-		return 0, fmt.Errorf("team not found")
+
+	// Then, check if the user is already a member
+	isMember, err := u.TeamMemberRepository.IsTeamMember(addedTeamID, addCustomerID)
+	if err != nil {
+		return 0, fmt.Errorf("failed to check team membership: %w", err)
+	}
+	if isMember {
+		return 0, fmt.Errorf("already a member of this team")
 	}
 	teamMember := &team_member.TeamMember{
 		TeamID:     addedTeamID,

@@ -46,7 +46,12 @@ func (c *TeamController) GetTeam(ctx *gin.Context) {
 		utils.ErrorResponse(ctx, "Invalid team ID")
 		return
 	}
-	team, err := c.usecase.GetTeam(id)
+	customerID, ok := ctx.Get("customer_id")
+	if !ok {
+		utils.ErrorResponse(ctx, "Customer ID not found")
+		return
+	}
+	team, err := c.usecase.GetTeam(id, customerID.(int))
 	if err != nil {
 		utils.ErrorResponse(ctx, err.Error())
 		return

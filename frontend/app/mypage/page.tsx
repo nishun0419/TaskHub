@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 
@@ -16,42 +16,58 @@ export default function MyPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [user, setUser] = useState<User | null>(null);
+  const hasRedirected = useRef(false);
+  const isInitialMount = useRef(true);
+  const isProcessing = useRef(false);
 
   useEffect(() => {
-    if (status === 'loading') return;
+    if (status === 'loading' || isProcessing.current) return;
 
-    const checkAndRedirect = () => {
-      // 保存された招待URLがあればリダイレクト
-      const inviteUrl = localStorage.getItem('inviteRedirectUrl');
-      if (inviteUrl) {
-        router.push(inviteUrl);
-        return true;
+    const processUser = async () => {
+      if (isProcessing.current) return;
+      isProcessing.current = true;
+
+      try {
+        if (session) {
+          // Googleログインの場合
+          setUser({
+            email: session.user?.email || '',
+            name: session.user?.name || '',
+            image: session.user?.image || '',
+          });
+        } else {
+          // JWTログインの場合
+          const storedUser = localStorage.getItem('user');
+          const token = localStorage.getItem('token');
+
+          if (!storedUser || !token) {
+            if (!hasRedirected.current) {
+              hasRedirected.current = true;
+              router.push('/login');
+            }
+            return;
+          }
+
+          setUser(JSON.parse(storedUser));
+        }
+
+        // 招待URLの処理
+        if (isInitialMount.current) {
+          isInitialMount.current = false;
+          const inviteUrl = localStorage.getItem('inviteRedirectUrl');
+          if (inviteUrl) {
+            hasRedirected.current = true;
+            localStorage.removeItem('inviteRedirectUrl');
+            router.push(inviteUrl);
+          }
+        }
+      } finally {
+        isProcessing.current = false;
       }
-      return false;
     };
 
-    if (session) {
-      // Googleログインの場合
-      setUser({
-        email: session.user?.email || '',
-        name: session.user?.name || '',
-        image: session.user?.image || '',
-      });
-      checkAndRedirect();
-    } else {
-      // JWTログインの場合
-      const storedUser = localStorage.getItem('user');
-      const token = localStorage.getItem('token');
-
-      if (!storedUser || !token) {
-        router.push('/login');
-        return;
-      }
-
-      setUser(JSON.parse(storedUser));
-      checkAndRedirect();
-    }
-  }, [session, status, router]);
+    processUser();
+  }, [session, status]);
 
   const handleLogout = () => {
     if (session) {

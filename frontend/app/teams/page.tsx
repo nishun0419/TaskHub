@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { API_ENDPOINTS } from '@/constants/api';
+import { useSession, signOut } from 'next-auth/react';
 
 interface Team {
   team_id: number;
@@ -15,8 +16,11 @@ export default function TeamsPage() {
   const router = useRouter();
   const [teams, setTeams] = useState<Team[]>([]);
   const [error, setError] = useState('');
-
+  const hasFetched = useRef(false);
+  const { data: session } = useSession();
   useEffect(() => {
+    if (hasFetched.current) return;
+
     const fetchTeams = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -32,19 +36,31 @@ export default function TeamsPage() {
         });
 
         if (!response.ok) {
+          if (response.status === 401) {
+            if (session) {
+              // Googleログインの場合
+              signOut();
+            } else {
+              // JWTログインの場合
+              localStorage.removeItem('user');
+              localStorage.removeItem('token');
+              localStorage.removeItem('inviteRedirectUrl'); // 招待URLも削除
+            }
+            router.push('/login');
+            return;
+          }
           throw new Error('チームの取得に失敗しました');
         }
-        console.log(response);
         const data = await response.json();
-        console.log(data.data);
         setTeams(data.data);
+        hasFetched.current = true;
       } catch (err) {
         setError(err instanceof Error ? err.message : 'チームの取得に失敗しました');
       }
     };
 
     fetchTeams();
-  }, [router]);
+  }, []); // 依存配列を空にして、初回のみ実行されるようにする
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">

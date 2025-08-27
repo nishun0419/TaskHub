@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import { useEffect, useState, use, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { API_ENDPOINTS } from '@/constants/api';
 
@@ -48,8 +48,11 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: n
     title: '',
     description: '',
   });
+  const hasFetched = useRef(false);
 
   useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
     const fetchTeamAndTodos = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -69,8 +72,11 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: n
           throw new Error('チーム情報の取得に失敗しました');
         }
 
-        console.log(teamResponse);
         const teamData = await teamResponse.json();
+        if (!teamData.data.name) {
+          router.push('/teams');
+          return;
+        }
         setTeam(teamData.data);
 
         // TODOの取得
@@ -86,14 +92,13 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: n
 
         const todosData = await todosResponse.json();
         setTodos(todosData.data);
-        console.log(todosData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'データの取得に失敗しました');
       }
     };
 
     fetchTeamAndTodos();
-  }, [resolvedParams.teamId, router]);
+  }, [resolvedParams.teamId]);
 
   const handleAddTodo = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -150,11 +155,6 @@ export default function TeamDetailPage({ params }: { params: Promise<{ teamId: n
           description: formData.description,
           completed: Boolean(formData.completed)
         }),
-      });
-      console.log('Request payload:', {
-        title: formData.title,
-        description: formData.description,
-        completed: Boolean(formData.completed)
       });
       if (!response.ok) {
         const errorData = await response.json();

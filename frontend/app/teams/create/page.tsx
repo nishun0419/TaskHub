@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { API_ENDPOINTS } from '@/constants/api';
-
+import { useSession, signOut } from 'next-auth/react';
 export default function TeamCreatePage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -11,7 +11,7 @@ export default function TeamCreatePage() {
     description: '',
   });
   const [error, setError] = useState('');
-
+  const { data: session } = useSession();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -41,6 +41,18 @@ export default function TeamCreatePage() {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          if (session) {
+            // Googleログインの場合
+            signOut();
+          } else {
+            // JWTログインの場合
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            localStorage.removeItem('inviteRedirectUrl'); // 招待URLも削除
+            router.push('/login');
+          }
+        }
         throw new Error('チームの作成に失敗しました');
       }
 

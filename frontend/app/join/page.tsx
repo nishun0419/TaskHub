@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { API_ENDPOINTS } from '@/constants/api';
 
@@ -14,53 +14,49 @@ function JoinContent() {
   const searchParams = useSearchParams();
   const [error, setError] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(true);
+  const hasProcessed = useRef(false);
+  const token = searchParams.get('token');
 
   useEffect(() => {
+    if (!token || hasProcessed.current) return;
+  
     const processInvitation = async () => {
+      if (hasProcessed.current) return;
+      hasProcessed.current = true;
+  
+      const storedToken = localStorage.getItem('token');
+      if (!storedToken) {
+        localStorage.setItem('inviteRedirectUrl', window.location.href);
+        router.replace('/login');
+        return;
+      }
+  
       try {
-        const token = searchParams.get('token');
-        if (!token) {
-          setError('招待トークンが見つかりません');
-          setIsProcessing(false);
-          return;
-        }
-
-        const storedToken = localStorage.getItem('token');
-        if (!storedToken) {
-          // 現在のURLをローカルストレージに保存
-          localStorage.setItem('inviteRedirectUrl', window.location.href);
-          // マイページ経由でログインページにリダイレクト
-          router.push('/login');
-          return;
-        }
-
-        // ローカルストレージから保存したURLを削除
-        localStorage.removeItem('inviteRedirectUrl');
-
         const response = await fetch(`${API_ENDPOINTS.TEAM_JOIN}`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${storedToken}`,
+            Authorization: `Bearer ${storedToken}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ token }),
         });
-
+  
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.message || '招待の処理に失敗しました');
         }
-
+  
         const data: JoinResponse = await response.json();
-        router.push(`/teams/${data.data}`);
+        router.replace(`/teams/${data.data}`);
       } catch (err) {
         setError(err instanceof Error ? err.message : '招待の処理中にエラーが発生しました');
         setIsProcessing(false);
       }
     };
-
+  
     processInvitation();
-  }, [router, searchParams]);
+  }, [token]);
+  
 
   if (error) {
     return (

@@ -18,9 +18,13 @@ func (r *TeamRepository) CreateTeam(team *team.Team) error {
 	return r.db.Create(team).Error
 }
 
-func (r *TeamRepository) GetTeam(id int) (*team.Team, error) {
-	var team team.Team
-	err := r.db.First(&team, id).Error
+func (r *TeamRepository) GetTeam(id int, customerID int) (*team.TeamWithRole, error) {
+	var team team.TeamWithRole
+	err := r.db.Select("teams.*, team_members.role").
+		Table("teams").
+		Joins("JOIN team_members ON teams.team_id = team_members.team_id").
+		Where("team_members.team_id = ? AND team_members.customer_id = ?", id, customerID).
+		Find(&team).Error
 	return &team, err
 }
 
@@ -30,6 +34,15 @@ func (r *TeamRepository) UpdateTeam(id int, team *team.Team) error {
 
 func (r *TeamRepository) DeleteTeam(id int) error {
 	return r.db.Delete(&team.Team{}, id).Error
+}
+
+func (r *TeamRepository) GetTeamByID(id int) (*team.Team, error) {
+	var team team.Team
+	err := r.db.First(&team, id).Error
+	if err != nil {
+		return nil, err
+	}
+	return &team, nil
 }
 
 func (r *TeamRepository) GetTeamsByCustomerID(customerID int) ([]*team.TeamWithRole, error) {
